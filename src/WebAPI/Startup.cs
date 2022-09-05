@@ -21,7 +21,7 @@ public class Startup
         _builder = WebApplication.CreateBuilder(args);
         _logger = LogManager.Setup().LoadConfigurationFromAppSettings().GetCurrentClassLogger();
 
-        _logger.Debug("The Message API was started");
+        _logger.Debug("The Authorization API was started");
     }
 
     public Startup SetBuilderOptions()
@@ -51,10 +51,15 @@ public class Startup
     public Startup SetDbContext()
     {
         var connString = _builder.Configuration.GetConnectionString("DefaultConnection");
+        var authConnString = _builder.Configuration.GetConnectionString("AuthorizationConnection");
 
         _builder.Services.AddDbContext<MessageDbContext>(options =>
         {
             options.UseSqlServer(connString).EnableSensitiveDataLogging();
+        });
+        _builder.Services.AddDbContext<AuthorizationDbContext>(options =>
+        {
+            options.UseSqlServer(authConnString).EnableSensitiveDataLogging();
         });
         
         _logger.Debug("SQL connection was successfully added");
