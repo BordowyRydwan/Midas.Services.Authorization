@@ -14,9 +14,4 @@ public class MessageDbContext : DbContext
     public MessageDbContext(DbContextOptions options) : base(options)
     {
     }
-
-    protected override void OnModelCreating(ModelBuilder modelBuilder)
-    {
-        modelBuilder.Seed();
-    }
 }
