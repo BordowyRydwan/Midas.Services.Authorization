@@ -1,5 +1,5 @@
-# File Storage Service
-A microservice which handles file operations - upload, download, collecting info. The template contains ASP.NET + EF Core solution with test suites. By default a database and the API are set to work in Docker containers.
+# Authorization Service
+A microservice which handles authorizing users. The template contains ASP.NET + EF Core solution with test suites. By default a database and the API are set to work in Docker containers.
 
 Following instructions are for Debian-based systems - but on Windows machines it should be similar or even simpler. 
 
