@@ -1,6 +1,9 @@
+using Application.Dto;
 using Application.Interfaces;
 using Application.Mappings;
 using Application.Services;
+using Application.Validators;
+using FluentValidation;
 using Infrastructure.Data;
 using Infrastructure.Interfaces;
 using Infrastructure.Repositories;
@@ -100,6 +103,13 @@ public class Startup
         _builder.Host.UseNLog();
 
         _logger.Debug("Logger options were successfully added");
+
+        return this;
+    }
+
+    public Startup AddValidators()
+    {
+        _builder.Services.AddScoped<IValidator<UserRegisterDto>, UserRegisterDtoValidator>();
 
         return this;
     }
