@@ -17,6 +17,11 @@ public static class AutoMapperConfig
             .ForMember(dest => dest.Items, act => act.MapFrom(src => src))
             .ForMember(dest => dest.Count, act => act.MapFrom(src => src.Count));
 
+        result.CreateMap<UserRegisterDto, User>()
+            .ForMember(dest => dest.RegisterDate, act => act.MapFrom(src => DateTime.UtcNow))
+            .ForMember(dest => dest.Id, act => act.Ignore())
+            .ForMember(dest => dest.UserFamilyRoles, act => act.Ignore());
+
         return result;
     }
 
