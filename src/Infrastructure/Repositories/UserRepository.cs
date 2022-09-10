@@ -1,8 +1,7 @@
-using System.Net;
 using Domain.Entities;
+using Domain.Exceptions;
 using Infrastructure.Data;
 using Infrastructure.Interfaces;
-using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Repositories;
 
@@ -15,18 +14,21 @@ public class UserRepository : IUserRepository
         _dbContext = dbContext;
     }
     
-    public async Task<bool> AddNewUser(User user)
+    public async Task AddNewUser(User user)
     {
         var doesNewUserEmailExist = _dbContext.Users.Select(x => x.Email).Contains(user.Email);
 
-        if (user.Email is null || doesNewUserEmailExist)
+        if (string.IsNullOrWhiteSpace(user.Email))
         {
-            return false;
+            throw new UserException("Mail address is empty!");
+        }
+        
+        if (doesNewUserEmailExist)
+        {
+            throw new UserException("Mail address already exists!");
         }
 
         await _dbContext.AddAsync(user).ConfigureAwait(false);
         await _dbContext.SaveChangesAsync().ConfigureAwait(false);
-        
-        return true;
     }
 }

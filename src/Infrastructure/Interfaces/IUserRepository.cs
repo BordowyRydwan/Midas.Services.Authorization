@@ -4,5 +4,5 @@ namespace Infrastructure.Interfaces;
 
 public interface IUserRepository
 {
-    public Task<bool> AddNewUser(User user);
+    public Task AddNewUser(User user);
 }
