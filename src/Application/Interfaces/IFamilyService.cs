@@ -4,5 +4,6 @@ namespace Application.Interfaces;
 
 public interface IFamilyService : IInternalService
 {
-    public Task AddNewFamily(AddNewFamilyDto dto);
+    public Task<AddNewFamilyReturnDto> AddNewFamily(AddNewFamilyDto dto);
+    public Task<bool> DeleteFamily(ulong id);
 }

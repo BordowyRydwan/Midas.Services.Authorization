@@ -18,19 +18,20 @@ public class UserService : IUserService
         _mapper = mapper;
     }
     
-    public async Task<bool> RegisterNewUser(UserRegisterDto user)
+    public async Task<UserRegisterReturnDto> RegisterNewUser(UserRegisterDto user)
     {
         var userEntity = _mapper.Map<UserRegisterDto, User>(user);
+        var returnModel = new UserRegisterReturnDto { Email = user.Email };
 
         try
         {
-            await _userRepository.AddNewUser(userEntity).ConfigureAwait(false);
+            returnModel.Id = await _userRepository.AddNewUser(userEntity).ConfigureAwait(false);
         }
         catch (UserException)
         {
-            return false;
+            return null;
         }
 
-        return true;
+        return returnModel;
     }
 }

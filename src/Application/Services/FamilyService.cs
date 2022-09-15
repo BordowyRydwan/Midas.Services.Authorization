@@ -17,9 +17,20 @@ public class FamilyService : IFamilyService
         _mapper = mapper;
     }
     
-    public async Task AddNewFamily(AddNewFamilyDto dto)
+    public async Task<AddNewFamilyReturnDto> AddNewFamily(AddNewFamilyDto dto)
     {
         var familyEntity = _mapper.Map<AddNewFamilyDto, Family>(dto);
-        await _familyRepository.AddNewFamily(familyEntity, dto.FounderId);
+        var familyId = await _familyRepository.AddNewFamily(familyEntity, dto.FounderId);
+
+        return new AddNewFamilyReturnDto
+        {
+            Id = familyId,
+            Name = dto.Name
+        };
+    }
+
+    public async Task<bool> DeleteFamily(ulong id)
+    {
+        return await _familyRepository.DeleteFamily(id).ConfigureAwait(false);
     }
 }

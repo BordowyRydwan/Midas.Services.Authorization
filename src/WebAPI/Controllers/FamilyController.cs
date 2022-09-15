@@ -25,7 +25,8 @@ public class FamilyController : ControllerBase
     {
         try
         {
-            await _familyService.AddNewFamily(dto).ConfigureAwait(false);
+            var returnDto = await _familyService.AddNewFamily(dto).ConfigureAwait(false);
+            return Ok(returnDto);
         }
         catch (UserException)
         {
@@ -37,7 +38,20 @@ public class FamilyController : ControllerBase
             _logger.LogError(ex.Message);
             return BadRequest(ex.Message);
         }
+    }
+    
+    [SwaggerOperation(Summary = "Delete specified family")]
+    [HttpPost("Add", Name = nameof(DeleteFamily))]
+    public async Task<IActionResult> DeleteFamily(ulong id)
+    {
+        var deleteSuccessful = await _familyService.DeleteFamily(id).ConfigureAwait(false);
+
+        if (deleteSuccessful)
+        {
+            return Ok();
+        }
         
-        return Ok();
+        _logger.LogError("Could not found family with ID: {Id}", id);
+        return NotFound();
     }
 }

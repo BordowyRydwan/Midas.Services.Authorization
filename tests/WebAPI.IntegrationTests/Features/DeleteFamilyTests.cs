@@ -7,18 +7,21 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
-using WebAPI.Controllers;
 using Moq;
+using WebAPI.Controllers;
 
 namespace WebAPI.IntegrationTests.Controllers;
 
 [TestFixture]
-public class FamilyControllerTests
+public class DeleteFamilyTests
 {
     private readonly FamilyController _familyController;
     private readonly UserController _userController;
 
-    public FamilyControllerTests()
+    private ulong _userId;
+    private ulong _familyId;
+
+    public DeleteFamilyTests()
     {
         var configuration = new ConfigurationBuilder().AddJsonFile("appsettings.Development.json").Build();
         var connectionString = configuration.GetConnectionString("AuthorizationConnection");
@@ -38,75 +41,45 @@ public class FamilyControllerTests
         var userLogger = Mock.Of<ILogger<UserController>>();
         _userController = new UserController(userLogger, userService);
     }
-
+    
     [SetUp]
     public async Task Init()
     {
-        var initialInstance = new UserRegisterDto
+        var randomNumber = new Random().Next(100000, 10000000);
+        var initialUser = new UserRegisterDto
         {
-            Email = "test@gmail.com",
+            Email = $"test{randomNumber}@gmail.com",
             FirstName = "Lorem",
             LastName = "Ipsum",
             BirthDate = new DateTime(2002, 1, 20),
             Password = "zaq1@WSX"
         };
-        
-        await _userController.RegisterNewUser(initialInstance).ConfigureAwait(false);
-    }
 
-    [Test]
-    public async Task OnEmptyFamilyName_ShouldThrowHTTP400()
-    {
-        var testInstance = new AddNewFamilyDto
+        var userResult = await _userController.RegisterNewUser(initialUser).ConfigureAwait(false) as OkObjectResult;
+        _userId = (userResult.Value as UserRegisterReturnDto).Id;
+        
+        var initialInstance = new AddNewFamilyDto
         {
-            Name = "",
-            FounderId = 1
+            Name = $"Family {randomNumber}",
+            FounderId = _userId
         };
-
-        var response = await _familyController.AddNewFamily(testInstance).ConfigureAwait(false);
-        
-        Assert.That(response, Is.InstanceOf<BadRequestObjectResult>());
+        var familyResult = await _familyController.AddNewFamily(initialInstance).ConfigureAwait(false) as OkObjectResult;
+        _familyId = (familyResult.Value as AddNewFamilyReturnDto).Id;
     }
     
     [Test]
-    public async Task OnNullFamilyName_ShouldThrowHTTP400()
+    public async Task OnNonExistingFamily_ShouldThrowHTTP404()
     {
-        var testInstance = new AddNewFamilyDto
-        {
-            FounderId = 1
-        };
-
-        var response = await _familyController.AddNewFamily(testInstance).ConfigureAwait(false);
+        var randomNumber = Convert.ToUInt64(new Random().Next(100000, 1000000));
+        var response = await _familyController.DeleteFamily(randomNumber).ConfigureAwait(false);
         
-        Assert.That(response, Is.InstanceOf<BadRequestObjectResult>());
+        Assert.That(response, Is.InstanceOf<NotFoundResult>());
     }
     
     [Test]
-    public async Task OnNonExistingUser_ShouldThrowHTTP404()
+    public async Task OnExistingFamily_ShouldThrowHTTP200()
     {
-        var randomNumber = new Random().Next(1000, 1000000);
-        var testInstance = new AddNewFamilyDto
-        {
-            Name = $"Test {randomNumber}",
-            FounderId = (ulong)randomNumber
-        };
-
-        var response = await _familyController.AddNewFamily(testInstance).ConfigureAwait(false);
-        
-        Assert.That(response, Is.InstanceOf<NotFoundObjectResult>());
-    }
-    
-    [Test]
-    public async Task OnProperModel_ShouldThrowHTTP200()
-    {
-        var randomNumber = new Random().Next(1000, 1000000);
-        var testInstance = new AddNewFamilyDto
-        {
-            Name = $"Test {randomNumber}",
-            FounderId = 1
-        };
-
-        var response = await _familyController.AddNewFamily(testInstance).ConfigureAwait(false);
+        var response = await _familyController.DeleteFamily(_familyId).ConfigureAwait(false);
         
         Assert.That(response, Is.InstanceOf<OkResult>());
     }

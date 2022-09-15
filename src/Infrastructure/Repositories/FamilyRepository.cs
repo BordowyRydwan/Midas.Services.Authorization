@@ -15,7 +15,7 @@ public class FamilyRepository : IFamilyRepository
         _dbContext = dbContext;
     }
 
-    public async Task AddNewFamily(Family family, ulong founderId)
+    public async Task<ulong> AddNewFamily(Family family, ulong founderId)
     {
         var user = await _dbContext.Users.FindAsync(founderId).ConfigureAwait(false);
         var doesFamilyExist = await _dbContext.Families.AnyAsync(x => x.Name == family.Name).ConfigureAwait(false);
@@ -48,5 +48,20 @@ public class FamilyRepository : IFamilyRepository
 
         await _dbContext.AddAsync(userFamilyRole).ConfigureAwait(false);
         await _dbContext.SaveChangesAsync().ConfigureAwait(false);
+        return family.Id;
+    }
+
+    public async Task<bool> DeleteFamily(ulong id)
+    {
+        var family = await _dbContext.Families.FindAsync(id).ConfigureAwait(false);
+
+        if (family is null)
+        {
+            return false;
+        }
+
+        _dbContext.Families.Remove(family);
+        await _dbContext.SaveChangesAsync().ConfigureAwait(false);
+        return true;
     }
 }
