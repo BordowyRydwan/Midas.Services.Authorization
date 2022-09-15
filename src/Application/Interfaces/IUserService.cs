@@ -4,5 +4,5 @@ namespace Application.Interfaces;
 
 public interface IUserService : IInternalService
 {
-    public Task<bool> RegisterNewUser(UserRegisterDto user);
+    public Task<UserRegisterReturnDto> RegisterNewUser(UserRegisterDto user);
 }

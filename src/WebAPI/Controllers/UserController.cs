@@ -22,11 +22,11 @@ public class UserController : ControllerBase
     [HttpPost("Register", Name = nameof(RegisterNewUser))]
     public async Task<IActionResult> RegisterNewUser(UserRegisterDto user)
     {
-        var isRegistrationSuccessful = await _userService.RegisterNewUser(user).ConfigureAwait(false);
+        var registerReturnDto = await _userService.RegisterNewUser(user).ConfigureAwait(false);
 
-        if (isRegistrationSuccessful)
+        if (registerReturnDto is not null)
         {
-            return Ok();
+            return Ok(registerReturnDto);
         }
 
         _logger.LogError("Could not register user with email: {Email}", user.Email);

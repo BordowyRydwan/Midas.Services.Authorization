@@ -1,4 +1,5 @@
 using Domain.Entities;
+using Domain.Exceptions;
 using Infrastructure.Data;
 using Infrastructure.Interfaces;
 using Infrastructure.Repositories;
@@ -16,7 +17,7 @@ public class AddUserTests
     {
         new()
         {
-            Id = 1, 
+            Id = 1,
             Email = "test@test.pl",
             FirstName = "Test 1",
             LastName = "Test 1",
@@ -30,7 +31,7 @@ public class AddUserTests
     {
         var mockContext = new Mock<AuthorizationDbContext>();
         var mockData = _data.AsQueryable().BuildMockDbSet();
-        
+
         mockContext.Setup(x => x.Users).Returns(mockData.Object);
         mockContext.Setup(m => m.AddAsync(It.IsAny<User>(), default))
             .Callback<User, CancellationToken>((user, _) =>
@@ -41,7 +42,7 @@ public class AddUserTests
 
         _repository = new UserRepository(mockContext.Object);
     }
-    
+
     [TearDown]
     public void ClearList()
     {
@@ -49,7 +50,7 @@ public class AddUserTests
         {
             new()
             {
-                Id = 1, 
+                Id = 1,
                 Email = "test@test.pl",
                 FirstName = "Test 1",
                 LastName = "Test 1",
@@ -71,16 +72,17 @@ public class AddUserTests
             BirthDate = DateTime.UtcNow,
             RegisterDate = DateTime.UtcNow
         };
-        
-        var result = await _repository.AddNewUser(testInstance).ConfigureAwait(false);
-        
+
+        var exception = Assert.ThrowsAsync<UserException>(async () =>
+            await _repository.AddNewUser(testInstance).ConfigureAwait(false));
+
         Assert.Multiple(() =>
         {
-            Assert.That(result, Is.False);
+            Assert.That(exception.Message, Is.EqualTo("Mail address already exists!"));
             Assert.That(_data, Has.Count.EqualTo(1));
         });
     }
-    
+
     [Test]
     public async Task ShouldAddUserWhenEmailDoesNotExist()
     {
@@ -92,13 +94,8 @@ public class AddUserTests
             BirthDate = DateTime.UtcNow,
             RegisterDate = DateTime.UtcNow
         };
-        
-        var result = await _repository.AddNewUser(testInstance).ConfigureAwait(false);
-        
-        Assert.Multiple(() =>
-        {
-            Assert.That(result, Is.True);
-            Assert.That(_data, Has.Count.EqualTo(2));
-        });
+
+        await _repository.AddNewUser(testInstance).ConfigureAwait(false);
+        Assert.That(_data, Has.Count.EqualTo(2));
     }
 }

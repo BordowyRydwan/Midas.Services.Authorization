@@ -62,7 +62,7 @@ public class UserControllerTests
         };
 
         var response = await _userController.RegisterNewUser(testInstance).ConfigureAwait(false);
-        Assert.That(response, Is.TypeOf<OkResult>());
+        Assert.That(response, Is.TypeOf<OkObjectResult>());
     }
 
     [Test]
