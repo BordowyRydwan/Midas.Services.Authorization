@@ -935,7 +935,7 @@
         </xs:attribute>
         <xs:attribute name="dbUserName" type="SimpleLayoutAttribute">
           <xs:annotation>
-            <xs:documentation>Database user name. If the ConnectionString is not provided this value will be used to construct the "User ID=" part of the connection string.</xs:documentation>
+            <xs:documentation>Database credentials name. If the ConnectionString is not provided this value will be used to construct the "User ID=" part of the connection string.</xs:documentation>
           </xs:annotation>
         </xs:attribute>
         <xs:attribute name="dbPassword" type="SimpleLayoutAttribute">
@@ -1274,7 +1274,7 @@
         </xs:attribute>
         <xs:attribute name="log" type="xs:string">
           <xs:annotation>
-            <xs:documentation>Name of the Event Log to write to. This can be System, Application or any user-defined name.</xs:documentation>
+            <xs:documentation>Name of the Event Log to write to. This can be System, Application or any credentials-defined name.</xs:documentation>
           </xs:annotation>
         </xs:attribute>
         <xs:attribute name="machineName" type="xs:string">

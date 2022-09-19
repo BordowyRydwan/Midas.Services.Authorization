@@ -20,6 +20,7 @@ public class UserController : ControllerBase
 
     [SwaggerOperation(Summary = "Register new user")]
     [HttpPost("Register", Name = nameof(RegisterNewUser))]
+    [ProducesResponseType(typeof(UserRegisterReturnDto), 200)]
     public async Task<IActionResult> RegisterNewUser(UserRegisterDto user)
     {
         var registerReturnDto = await _userService.RegisterNewUser(user).ConfigureAwait(false);
@@ -31,5 +32,22 @@ public class UserController : ControllerBase
 
         _logger.LogError("Could not register user with email: {Email}", user.Email);
         return BadRequest();
+    }
+    
+    [SwaggerOperation(Summary = "Register new user")]
+    [HttpPost("Authorize", Name = nameof(AuthorizeUser))]
+    [ProducesResponseType(typeof(string), 200)]
+    public async Task<IActionResult> AuthorizeUser(UserLoginDto user)
+    {
+        var userCredentialsCheck = await _userService.CheckUserCredentials(user).ConfigureAwait(false);
+
+        if (!userCredentialsCheck)
+        {
+            _logger.LogError("Email or password are invalid.");
+            return BadRequest();
+        }
+
+        var jwtToken = await _userService.GenerateJwtToken(user).ConfigureAwait(false);
+        return Ok(jwtToken);
     }
 }

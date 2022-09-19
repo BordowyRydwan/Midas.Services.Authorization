@@ -1,6 +1,7 @@
 using Application.Dto;
 using AutoMapper;
 using Domain.Entities;
+using Domain.Models;
 
 namespace Application.Mappings;
 
@@ -20,7 +21,10 @@ public static class AutoMapperConfig
         result.CreateMap<UserRegisterDto, User>()
             .ForMember(dest => dest.RegisterDate, act => act.MapFrom(src => DateTime.UtcNow))
             .ForMember(dest => dest.Id, act => act.Ignore())
-            .ForMember(dest => dest.UserFamilyRoles, act => act.Ignore());
+            .ForMember(dest => dest.UserFamilyRoles, act => act.Ignore())
+            .ForMember(dest => dest.Password, act => act.Ignore());
+
+        result.CreateMap<UserLoginDto, UserCredentials>().ReverseMap();
 
         result.CreateMap<AddNewFamilyDto, Family>()
             .ForMember(dest => dest.Id, act => act.Ignore());

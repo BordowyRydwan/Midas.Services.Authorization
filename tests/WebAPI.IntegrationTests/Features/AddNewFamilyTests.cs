@@ -1,8 +1,10 @@
 using Application.Dto;
 using Application.Mappings;
 using Application.Services;
+using Domain.Entities;
 using Infrastructure.Data;
 using Infrastructure.Repositories;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -34,7 +36,8 @@ public class AddNewFamilyTests
         var familyLogger = Mock.Of<ILogger<FamilyController>>();
         _familyController = new FamilyController(familyLogger, familyService);
         
-        var userService = new UserService(userRepository, mapper);
+        var passwordHasher = new PasswordHasher<User>();
+        var userService = new UserService(userRepository, mapper, passwordHasher, configuration);
         var userLogger = Mock.Of<ILogger<UserController>>();
         _userController = new UserController(userLogger, userService);
     }

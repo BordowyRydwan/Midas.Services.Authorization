@@ -21,6 +21,7 @@ public class FamilyController : ControllerBase
 
     [SwaggerOperation(Summary = "Register new family")]
     [HttpPost("Add", Name = nameof(AddNewFamily))]
+    [ProducesResponseType(typeof(AddNewFamilyReturnDto), 200)]
     public async Task<IActionResult> AddNewFamily(AddNewFamilyDto dto)
     {
         try
@@ -41,7 +42,7 @@ public class FamilyController : ControllerBase
     }
     
     [SwaggerOperation(Summary = "Delete specified family")]
-    [HttpPost("Add", Name = nameof(DeleteFamily))]
+    [HttpDelete("Delete", Name = nameof(DeleteFamily))]
     public async Task<IActionResult> DeleteFamily(ulong id)
     {
         var deleteSuccessful = await _familyService.DeleteFamily(id).ConfigureAwait(false);

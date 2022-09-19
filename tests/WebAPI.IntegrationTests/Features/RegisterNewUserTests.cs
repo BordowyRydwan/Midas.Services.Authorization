@@ -1,8 +1,10 @@
 using Application.Dto;
 using Application.Mappings;
 using Application.Services;
+using Domain.Entities;
 using Infrastructure.Data;
 using Infrastructure.Repositories;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -13,11 +15,11 @@ using Moq;
 namespace WebAPI.IntegrationTests.Controllers;
 
 [TestFixture]
-public class UserControllerTests
+public class RegisterNewUserTests
 {
     private readonly UserController _userController;
 
-    public UserControllerTests()
+    public RegisterNewUserTests()
     {
         var configuration = new ConfigurationBuilder().AddJsonFile("appsettings.Development.json").Build();
         var connectionString = configuration.GetConnectionString("AuthorizationConnection");
@@ -26,8 +28,9 @@ public class UserControllerTests
         var dbContext = new AuthorizationDbContext(dbOptions);
         var repository = new UserRepository(dbContext);
         var mapper = AutoMapperConfig.Initialize();
+        var passwordHasher = new PasswordHasher<User>();
 
-        var service = new UserService(repository, mapper);
+        var service = new UserService(repository, mapper, passwordHasher, configuration);
         var logger = Mock.Of<ILogger<UserController>>();
 
         _userController = new UserController(logger, service);
