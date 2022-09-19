@@ -1,13 +1,17 @@
+using System.Text;
 using Application.Dto;
 using Application.Interfaces;
 using Application.Mappings;
 using Application.Services;
 using Application.Validators;
+using Domain.Entities;
 using FluentValidation;
 using Infrastructure.Data;
 using Infrastructure.Interfaces;
 using Infrastructure.Repositories;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using NLog;
 using NLog.Web;
 using WebAPI.Extensions;
@@ -18,7 +22,7 @@ public class Startup
 {
     private readonly WebApplicationBuilder _builder;
     private readonly Logger _logger;
-
+    
     public Startup(string[] args)
     {
         _builder = WebApplication.CreateBuilder(args);
@@ -83,6 +87,8 @@ public class Startup
     public Startup AddInternalServices()
     {
         _builder.Services.AddScoped<IMessageService, MessageService>();
+        _builder.Services.AddScoped<IFamilyService, FamilyService>();
+        _builder.Services.AddScoped<IUserService, UserService>();
         _logger.Debug("Internal services were successfully added");
 
         return this;
@@ -91,6 +97,8 @@ public class Startup
     public Startup AddInternalRepositories()
     {
         _builder.Services.AddScoped<IMessageRepository, MessageRepository>();
+        _builder.Services.AddScoped<IFamilyRepository, FamilyRepository>();
+        _builder.Services.AddScoped<IUserRepository, UserRepository>();
         _logger.Debug("Internal repositories were successfully added");
 
         return this;
@@ -110,6 +118,35 @@ public class Startup
     public Startup AddValidators()
     {
         _builder.Services.AddScoped<IValidator<UserRegisterDto>, UserRegisterDtoValidator>();
+
+        return this;
+    }
+
+    public Startup AddPasswordHashers()
+    {
+        _builder.Services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
+
+        return this;
+    }
+
+    public Startup SetupAuthentication()
+    {
+        _builder.Services.AddAuthentication(option =>
+        {
+            option.DefaultAuthenticateScheme = "Bearer";
+            option.DefaultScheme = "Bearer";
+            option.DefaultChallengeScheme = "Bearer";
+        }).AddJwtBearer(cfg =>
+        {
+            cfg.RequireHttpsMetadata = false;
+            cfg.SaveToken = true;
+            cfg.TokenValidationParameters = new TokenValidationParameters
+            {
+                ValidIssuer = _builder.Configuration["Jwt:Issuer"],
+                ValidAudience = _builder.Configuration["Jwt:Issuer"],
+                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_builder.Configuration["Jwt:Key"]))
+            };
+        });
 
         return this;
     }

@@ -1,7 +1,9 @@
 using Domain.Entities;
 using Domain.Exceptions;
+using Domain.Models;
 using Infrastructure.Data;
 using Infrastructure.Interfaces;
+using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Repositories;
 
@@ -31,5 +33,15 @@ public class UserRepository : IUserRepository
         await _dbContext.AddAsync(user).ConfigureAwait(false);
         await _dbContext.SaveChangesAsync().ConfigureAwait(false);
         return user.Id;
+    }
+
+    public async Task<User> GetUserByEmail(string email)
+    {
+        return await _dbContext.Users.SingleOrDefaultAsync(x => x.Email == email).ConfigureAwait(false);
+    }
+
+    public async Task<User> GetUserById(ulong id)
+    {
+        return await _dbContext.Users.FindAsync(id).ConfigureAwait(false);
     }
 }

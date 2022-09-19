@@ -39,6 +39,11 @@ public class AddUserTests
                 user.Id = (ulong)(_data.Count + 1);
                 _data.Add(user);
             });
+        mockData.Setup(x => x.FindAsync(It.IsAny<ulong>())).ReturnsAsync((object[] ids) =>
+        {
+            var id = (ulong)ids[0];
+            return _data.FirstOrDefault(x => x.Id == id);
+        });
 
         _repository = new UserRepository(mockContext.Object);
     }
