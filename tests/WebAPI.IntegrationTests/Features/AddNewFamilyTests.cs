@@ -37,7 +37,7 @@ public class AddNewFamilyTests
         _familyController = new FamilyController(familyLogger, familyService);
         
         var passwordHasher = new PasswordHasher<User>();
-        var userService = new UserService(userRepository, mapper, passwordHasher, configuration);
+        var userService = new UserService(userRepository, mapper, passwordHasher);
         var userLogger = Mock.Of<ILogger<UserController>>();
         _userController = new UserController(userLogger, userService);
     }

@@ -30,7 +30,7 @@ public class RegisterNewUserTests
         var mapper = AutoMapperConfig.Initialize();
         var passwordHasher = new PasswordHasher<User>();
 
-        var service = new UserService(repository, mapper, passwordHasher, configuration);
+        var service = new UserService(repository, mapper, passwordHasher);
         var logger = Mock.Of<ILogger<UserController>>();
 
         _userController = new UserController(logger, service);

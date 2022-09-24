@@ -1,6 +1,5 @@
 using Domain.Entities;
 using Domain.Exceptions;
-using Domain.Models;
 using Infrastructure.Data;
 using Infrastructure.Interfaces;
 using Microsoft.EntityFrameworkCore;
@@ -43,5 +42,53 @@ public class UserRepository : IUserRepository
     public async Task<User> GetUserById(ulong id)
     {
         return await _dbContext.Users.FindAsync(id).ConfigureAwait(false);
+    }
+
+    public async Task<bool> UpdateUserData(User user)
+    {
+        var entity = await _dbContext.Users.SingleOrDefaultAsync(x => x.Email == user.Email).ConfigureAwait(false);
+
+        if (entity is null)
+        {
+            return false;
+        }
+
+        user.Id = entity.Id;
+        _dbContext.Users.Update(user);
+        await _dbContext.SaveChangesAsync().ConfigureAwait(false);
+        
+        return true;
+    }
+
+    public async Task<bool> UpdateUserEmail(string from, string to)
+    {
+        var entity = await _dbContext.Users.SingleOrDefaultAsync(x => x.Email == from).ConfigureAwait(false);
+
+        if (entity is null)
+        {
+            return false;
+        }
+
+        entity.Email = to;
+        _dbContext.Users.Update(entity);
+        await _dbContext.SaveChangesAsync().ConfigureAwait(false);
+
+        return true;
+    }
+
+    public async Task<bool> UpdateUserPassword(string userEmail, string passwordHash)
+    {
+        var entity = await _dbContext.Users.SingleOrDefaultAsync(x => x.Email == userEmail).ConfigureAwait(false);
+
+        if (entity is null)
+        {
+            return false;
+        }
+
+        entity.Password = passwordHash;
+        _dbContext.Users.Update(entity);
+        await _dbContext.SaveChangesAsync().ConfigureAwait(false);
+
+        return true;
     }
 }

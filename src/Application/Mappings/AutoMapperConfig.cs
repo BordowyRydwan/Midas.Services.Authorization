@@ -23,6 +23,12 @@ public static class AutoMapperConfig
             .ForMember(dest => dest.Id, act => act.Ignore())
             .ForMember(dest => dest.UserFamilyRoles, act => act.Ignore())
             .ForMember(dest => dest.Password, act => act.Ignore());
+        
+        result.CreateMap<UserUpdateDto, User>()
+            .ForMember(dest => dest.RegisterDate, act => act.MapFrom(src => DateTime.UtcNow))
+            .ForMember(dest => dest.Id, act => act.Ignore())
+            .ForMember(dest => dest.UserFamilyRoles, act => act.Ignore())
+            .ForMember(dest => dest.Password, act => act.Ignore());
 
         result.CreateMap<UserLoginDto, UserCredentials>().ReverseMap();
 

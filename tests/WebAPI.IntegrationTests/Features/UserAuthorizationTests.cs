@@ -18,6 +18,7 @@ namespace WebAPI.IntegrationTests.Controllers;
 [TestFixture]
 public class UserAuthorizationTests
 {
+    private readonly AuthorizationController _authorizationController;
     private readonly UserController _userController;
 
     public UserAuthorizationTests()
@@ -31,10 +32,14 @@ public class UserAuthorizationTests
         var mapper = AutoMapperConfig.Initialize();
         var passwordHasher = new PasswordHasher<User>();
 
-        var service = new UserService(repository, mapper, passwordHasher, configuration);
-        var logger = Mock.Of<ILogger<UserController>>();
+        var authService = new AuthorizationService(repository, mapper, passwordHasher, configuration);
+        var authLogger = Mock.Of<ILogger<AuthorizationController>>();
+        
+        var userService = new UserService(repository, mapper, passwordHasher);
+        var userLogger = Mock.Of<ILogger<UserController>>();
 
-        _userController = new UserController(logger, service);
+        _authorizationController = new AuthorizationController(authLogger, authService);
+        _userController = new UserController(userLogger, userService);
     }
     
     [SetUp]
@@ -60,7 +65,7 @@ public class UserAuthorizationTests
             Email = "test@gmail.com",
             Password = "zaq1@WSX"
         };
-        var response = await _userController.AuthorizeUser(testInstance).ConfigureAwait(false);
+        var response = await _authorizationController.AuthorizeUser(testInstance).ConfigureAwait(false);
         var result = (response as OkObjectResult).Value.ToString();
         
         Assert.Multiple(() =>
@@ -78,7 +83,7 @@ public class UserAuthorizationTests
             Email = "test@gmailkljlk.com",
             Password = "zaq1@WSX"
         };
-        var response = await _userController.AuthorizeUser(testInstance).ConfigureAwait(false);
+        var response = await _authorizationController.AuthorizeUser(testInstance).ConfigureAwait(false);
         
         Assert.That(response, Is.InstanceOf<BadRequestResult>());
     }
@@ -91,7 +96,7 @@ public class UserAuthorizationTests
             Email = "test@gmail.com",
             Password = "zaq1@WSXkljklj"
         };
-        var response = await _userController.AuthorizeUser(testInstance).ConfigureAwait(false);
+        var response = await _authorizationController.AuthorizeUser(testInstance).ConfigureAwait(false);
 
         Assert.That(response, Is.InstanceOf<BadRequestResult>());
     }
