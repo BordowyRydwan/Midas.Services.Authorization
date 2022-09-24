@@ -13,7 +13,7 @@ namespace Application.UnitTests.Common;
 [TestFixture]
 public class CheckUserCredentialsTests
 {
-    private readonly IUserService _service;
+    private readonly IAuthorizationService _service;
 
     private IList<User> _data = new List<User>
     {
@@ -40,7 +40,7 @@ public class CheckUserCredentialsTests
         mockRepository.Setup(x => x.GetUserByEmail(It.IsAny<string>()))
             .ReturnsAsync((string email) => _data.FirstOrDefault(x => x.Email == email));
 
-        _service = new UserService(mockRepository.Object, mapper, mockPasswordHasher, mockConfiguration.Object);
+        _service = new AuthorizationService(mockRepository.Object, mapper, mockPasswordHasher, mockConfiguration.Object);
     }
 
     [Test]

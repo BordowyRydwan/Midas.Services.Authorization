@@ -8,4 +8,5 @@ new WebAPI.Startup(args)
     .AddInternalRepositories()
     .AddValidators()
     .AddPasswordHashers()
+    .SetupAuthentication()
     .Run();

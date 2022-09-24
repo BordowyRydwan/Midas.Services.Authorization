@@ -34,20 +34,49 @@ public class UserController : ControllerBase
         return BadRequest();
     }
     
-    [SwaggerOperation(Summary = "Register new user")]
-    [HttpPost("Authorize", Name = nameof(AuthorizeUser))]
-    [ProducesResponseType(typeof(string), 200)]
-    public async Task<IActionResult> AuthorizeUser(UserLoginDto user)
+    [SwaggerOperation(Summary = "Update data of existing user")]
+    [HttpPatch("Update/Data", Name = nameof(UpdateUserData))]
+    public async Task<IActionResult> UpdateUserData(UserUpdateDto user)
     {
-        var userCredentialsCheck = await _userService.CheckUserCredentials(user).ConfigureAwait(false);
+        var updateSuccess = await _userService.UpdateUserData(user).ConfigureAwait(false);
 
-        if (!userCredentialsCheck)
+        if (updateSuccess)
         {
-            _logger.LogError("Email or password are invalid.");
-            return BadRequest();
+            return Ok();
         }
 
-        var jwtToken = await _userService.GenerateJwtToken(user).ConfigureAwait(false);
-        return Ok(jwtToken);
+        _logger.LogError("Could not update data for user with email: {Email}", user.Email);
+        return BadRequest();
+    }
+    
+    [SwaggerOperation(Summary = "Update email address of existing user")]
+    [HttpPatch("Update/Email", Name = nameof(UpdateUserEmail))]
+    public async Task<IActionResult> UpdateUserEmail(UserUpdateEmailDto user)
+    {
+        var updateSuccess = await _userService.UpdateUserEmail(user).ConfigureAwait(false);
+
+        if (updateSuccess)
+        {
+            return Ok();
+        }
+
+        _logger.LogError("Could not register user with email: {Email}", user.OldEmail);
+        return BadRequest();
+    }
+    
+    // TODO: Fix security issue - now everyone has access to change everyone's password
+    [SwaggerOperation(Summary = "Change password of existing user")]
+    [HttpPatch("Update/Password", Name = nameof(UpdateUserPassword))]
+    public async Task<IActionResult> UpdateUserPassword(UserUpdatePasswordDto user)
+    {
+        var updateSuccess = await _userService.UpdateUserPassword(user).ConfigureAwait(false);
+
+        if (updateSuccess)
+        {
+            return Ok();
+        }
+
+        _logger.LogError("Could not update password for user with email: {Email}", user.Email);
+        return BadRequest();
     }
 }

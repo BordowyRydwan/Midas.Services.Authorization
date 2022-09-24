@@ -4,15 +4,14 @@ using FluentValidation;
 
 namespace Application.Validators;
 
-public class UserRegisterDtoValidator : AbstractValidator<UserRegisterDto>
+public class UserUpdatePasswordDtoValidator : AbstractValidator<UserUpdatePasswordDto>
 {
-    public UserRegisterDtoValidator()
+    public UserUpdatePasswordDtoValidator()
     {
         RuleFor(x => x.Email)
-            .NotEmpty().WithMessage(EmailErrorMessages.Empty)
             .EmailAddress().WithMessage(EmailErrorMessages.NotValid);
         
-        RuleFor(x => x.Password)
+        RuleFor(x => x.NewPassword)
             .NotNull()
             .MinimumLength(8).WithMessage(PasswordErrorMessages.MinimumLength)
             .MaximumLength(64).WithMessage(PasswordErrorMessages.MaximumLength)
@@ -20,9 +19,5 @@ public class UserRegisterDtoValidator : AbstractValidator<UserRegisterDto>
             .Matches("[a-z]").WithMessage(PasswordErrorMessages.LowercaseLetter)
             .Matches("[0-9]").WithMessage(PasswordErrorMessages.Digit)
             .Matches("[^a-zA-Z0-9]").WithMessage(PasswordErrorMessages.SpecialChars);
-
-        RuleFor(x => x.FirstName).MinimumLength(3).MaximumLength(64);
-        RuleFor(x => x.LastName).MinimumLength(3).MaximumLength(64);
-        RuleFor(x => x.BirthDate).LessThan(DateTime.Today);
     }
 }

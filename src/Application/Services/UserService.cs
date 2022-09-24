@@ -1,4 +1,5 @@
 using System.IdentityModel.Tokens.Jwt;
+using System.Runtime.InteropServices.ComTypes;
 using System.Security.Claims;
 using System.Text;
 using Application.Dto;
@@ -6,7 +7,6 @@ using Application.Interfaces;
 using AutoMapper;
 using Domain.Entities;
 using Domain.Exceptions;
-using Domain.Models;
 using Infrastructure.Interfaces;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
@@ -19,19 +19,12 @@ public class UserService : IUserService
     private readonly IUserRepository _userRepository;
     private readonly IMapper _mapper;
     private readonly IPasswordHasher<User> _passwordHasher;
-    private readonly IConfiguration _configuration;
 
-    public UserService(
-        IUserRepository userRepository, 
-        IMapper mapper, 
-        IPasswordHasher<User> passwordHasher,
-        IConfiguration configuration
-        )
+    public UserService(IUserRepository userRepository, IMapper mapper, IPasswordHasher<User> passwordHasher)
     {
         _userRepository = userRepository;
         _mapper = mapper;
         _passwordHasher = passwordHasher;
-        _configuration = configuration;
     }
     
     public async Task<UserRegisterReturnDto> RegisterNewUser(UserRegisterDto user)
@@ -53,44 +46,24 @@ public class UserService : IUserService
         return returnModel;
     }
 
-    public async Task<bool> CheckUserCredentials(UserLoginDto user)
+    public async Task<bool> UpdateUserData(UserUpdateDto user)
     {
-        var userEntity = await _userRepository.GetUserByEmail(user.Email).ConfigureAwait(false);
+        var userEntity = _mapper.Map<UserUpdateDto, User>(user);
+        var updateResult = await _userRepository.UpdateUserData(userEntity);
 
-        if (userEntity is null)
-        {
-            return false;
-        }
-        
-        var verificationResult = _passwordHasher.VerifyHashedPassword(userEntity, userEntity.Password, user.Password);
-
-        return verificationResult == PasswordVerificationResult.Success;
+        return updateResult;
     }
 
-    public async Task<string> GenerateJwtToken(UserLoginDto user)
+    public async Task<bool> UpdateUserEmail(UserUpdateEmailDto user)
     {
-        var userEntity = await _userRepository.GetUserByEmail(user.Email).ConfigureAwait(false);
+        return await _userRepository.UpdateUserEmail(user.OldEmail, user.NewEmail);
+    }
 
-        var claims = new List<Claim>
-        {
-            new (ClaimTypes.NameIdentifier, userEntity.Id.ToString()),
-            new (ClaimTypes.Name, $"{userEntity.FirstName} {userEntity.LastName}"),
-            new (ClaimTypes.Email, $"{userEntity.Email}")
-        };
+    public async Task<bool> UpdateUserPassword(UserUpdatePasswordDto user)
+    {
+        var hash = _passwordHasher.HashPassword(new User(), user.NewPassword);
+        var updateResult = await _userRepository.UpdateUserPassword(user.Email, hash);
 
-        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]));
-        var cred = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-        var expires = DateTime.Now.AddDays(Convert.ToInt32(_configuration["Jwt:ExpireDays"]));
-
-        var token = new JwtSecurityToken(
-            issuer: _configuration["Jwt:Issuer"], 
-            audience: _configuration["Jwt:Key"], 
-            claims: claims, 
-            expires: expires, 
-            signingCredentials: cred
-        );
-        
-        var tokenHandler = new JwtSecurityTokenHandler();
-        return tokenHandler.WriteToken(token);
+        return updateResult;
     }
 }

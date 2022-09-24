@@ -89,6 +89,7 @@ public class Startup
         _builder.Services.AddScoped<IMessageService, MessageService>();
         _builder.Services.AddScoped<IFamilyService, FamilyService>();
         _builder.Services.AddScoped<IUserService, UserService>();
+        _builder.Services.AddScoped<IAuthorizationService, AuthorizationService>();
         _logger.Debug("Internal services were successfully added");
 
         return this;
@@ -118,14 +119,20 @@ public class Startup
     public Startup AddValidators()
     {
         _builder.Services.AddScoped<IValidator<UserRegisterDto>, UserRegisterDtoValidator>();
+        _builder.Services.AddScoped<IValidator<UserUpdateDto>, UserUpdateDtoValidator>();
+        _builder.Services.AddScoped<IValidator<UserUpdateEmailDto>, UserUpdateEmailDtoValidator>();
+        _builder.Services.AddScoped<IValidator<UserUpdatePasswordDto>, UserUpdatePasswordDtoValidator>();
 
+        _logger.Debug("Validators were successfully added");
+        
         return this;
     }
 
     public Startup AddPasswordHashers()
     {
         _builder.Services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
-
+        
+        _logger.Debug("Password hashers were successfully added");
         return this;
     }
 
@@ -148,6 +155,7 @@ public class Startup
             };
         });
 
+        _logger.Debug("Authorization has been successfully set");
         return this;
     }
 
