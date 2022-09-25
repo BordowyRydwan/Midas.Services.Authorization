@@ -1,3 +1,4 @@
+using System.Net;
 using System.Text;
 using Application.Dto;
 using Application.Interfaces;
@@ -9,9 +10,11 @@ using FluentValidation;
 using Infrastructure.Data;
 using Infrastructure.Interfaces;
 using Infrastructure.Repositories;
+using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
 using NLog;
 using NLog.Web;
 using WebAPI.Extensions;
@@ -159,9 +162,60 @@ public class Startup
         return this;
     }
 
+    public Startup SetSwaggerConfig()
+    {
+        _builder.Services.AddSwaggerGen(c =>
+        {
+            c.EnableAnnotations();
+            c.SwaggerDoc("v1", new Microsoft.OpenApi.Models.OpenApiInfo { Title = "Authorization API", Version = "0.1" });
+            c.AddSecurityDefinition("AuthorizationBearer", new OpenApiSecurityScheme
+            {
+                Description = @"JWT Authorization header using the Bearer scheme.
+          <br/> Enter your token in the text input below.
+          <br/> You don't have to add prefix 'Bearer'.
+          <br/> Example: 'this_is_my_token'",
+                Type = SecuritySchemeType.Http,
+                Scheme = "Bearer"
+            });
+            c.AddSecurityRequirement(new OpenApiSecurityRequirement
+            {
+                {
+                    new OpenApiSecurityScheme
+                    {
+                        Reference = new OpenApiReference
+                        {
+                            Type = ReferenceType.SecurityScheme,
+                            Id = "AuthorizationBearer"
+                        },
+                        Scheme = "oauth2",
+                        Name = "Bearer"
+                    },
+                    new List<string>()
+                }
+            });
+        });
+
+        return this;
+    }
+
     public void Run()
     {
         var app = _builder.Build();
+        
+        app.UseExceptionHandler(appError =>
+        {
+            appError.Run(async context =>
+            {
+                context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
+                context.Response.ContentType = "application/json";
+                
+                var contextFeature = context.Features.Get<IExceptionHandlerFeature>();
+                if (contextFeature != null)
+                {
+                    _logger.Error($"Something went wrong: {contextFeature.Error}");
+                }
+            });
+        });
 
         if (app.Environment.IsDevelopment())
         {
@@ -172,6 +226,7 @@ public class Startup
         app.MigrateDatabase();
         app.UseHttpsRedirection();
         app.UseCors("Open");
+        app.UseAuthorization();
         app.MapControllers();
         app.Run();
         

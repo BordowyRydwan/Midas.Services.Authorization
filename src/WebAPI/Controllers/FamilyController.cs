@@ -19,7 +19,7 @@ public class FamilyController : ControllerBase
         _familyService = familyService;
     }
 
-    [SwaggerOperation(Summary = "Register new family")]
+    [SwaggerOperation(Summary = "Add new family")]
     [HttpPost("Add", Name = nameof(AddNewFamily))]
     [ProducesResponseType(typeof(AddNewFamilyReturnDto), 200)]
     public async Task<IActionResult> AddNewFamily(AddNewFamilyDto dto)
@@ -56,7 +56,7 @@ public class FamilyController : ControllerBase
         return NotFound();
     }
     
-    [SwaggerOperation(Summary = "Delete specified family")]
+    [SwaggerOperation(Summary = "Add user to specified family")]
     [HttpPost("Add/User", Name = nameof(AddUserToFamily))]
     public async Task<IActionResult> AddUserToFamily(AddUserToFamilyDto dto)
     {
@@ -71,7 +71,7 @@ public class FamilyController : ControllerBase
         return NotFound();
     }
     
-    [SwaggerOperation(Summary = "Delete specified family")]
+    [SwaggerOperation(Summary = "Delete user from specified family")]
     [HttpDelete("Delete/User", Name = nameof(DeleteUserFromFamily))]
     public async Task<IActionResult> DeleteUserFromFamily(DeleteUserFromFamilyDto dto)
     {
@@ -86,7 +86,7 @@ public class FamilyController : ControllerBase
         return NotFound();
     }
 
-    [SwaggerOperation(Summary = "Delete specified family")]
+    [SwaggerOperation(Summary = "Set a user role to specified family")]
     [HttpPatch("Set/UserRole", Name = nameof(SetUserFamilyRole))]
     public async Task<IActionResult> SetUserFamilyRole(SetUserFamilyRoleDto dto)
     {

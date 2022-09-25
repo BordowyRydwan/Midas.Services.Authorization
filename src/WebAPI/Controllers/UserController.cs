@@ -90,7 +90,7 @@ public class UserController : ControllerBase
         return Ok();
     }
     
-    [SwaggerOperation(Summary = "Change password of existing user")]
+    [SwaggerOperation(Summary = "Get a user by email address")]
     [HttpGet("Email/{email}", Name = nameof(GetUserByEmail))]
     [ProducesResponseType(typeof(UserDto), 200)]
     public async Task<IActionResult> GetUserByEmail(string email)

@@ -18,7 +18,7 @@ public class AuthorizationController : ControllerBase
         _authorizationService = authorizationService;
     }
 
-    [SwaggerOperation(Summary = "Register new user")]
+    [SwaggerOperation(Summary = "Login a user")]
     [HttpPost("Login", Name = nameof(AuthorizeUser))]
     [ProducesResponseType(typeof(string), 200)]
     public async Task<IActionResult> AuthorizeUser(UserLoginDto user)

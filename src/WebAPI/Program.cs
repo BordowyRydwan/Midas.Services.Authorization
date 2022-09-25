@@ -1,6 +1,7 @@
 new WebAPI.Startup(args)
     .AddLoggerConfig()
     .SetOpenCors()
+    .SetSwaggerConfig()
     .SetDbContext()
     .SetBuilderOptions()
     .SetMapperConfig()
