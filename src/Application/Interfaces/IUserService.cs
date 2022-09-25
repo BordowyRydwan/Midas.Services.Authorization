@@ -8,4 +8,5 @@ public interface IUserService : IInternalService
     public Task<bool> UpdateUserData(UserUpdateDto user);
     public Task UpdateUserEmail(UserUpdateEmailDto user);
     public Task UpdateUserPassword(UserUpdatePasswordDto user);
+    public Task<UserDto> GetUserByEmail(string email);
 }

@@ -1,7 +1,3 @@
-using System.IdentityModel.Tokens.Jwt;
-using System.Runtime.InteropServices.ComTypes;
-using System.Security.Claims;
-using System.Text;
 using Application.Dto;
 using Application.Interfaces;
 using AutoMapper;
@@ -75,5 +71,13 @@ public class UserService : IUserService
         }
 
         await _userRepository.UpdateUserPassword(user.Email, hash);
+    }
+
+    public async Task<UserDto> GetUserByEmail(string email)
+    {
+        var entity = await _userRepository.GetUserByEmail(email).ConfigureAwait(false);
+        var dto = _mapper.Map<User, UserDto>(entity);
+
+        return dto;
     }
 }

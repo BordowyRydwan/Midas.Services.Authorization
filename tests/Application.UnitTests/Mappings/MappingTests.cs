@@ -25,9 +25,11 @@ public class MappingTests
     }
 
     [Test]
-    [TestCase(typeof(Message), typeof(MessageDto))]
-    [TestCase(typeof(MessageDto), typeof(Message))]
-    [TestCase(typeof(List<Message>), typeof(MessageListDto))]
+    [TestCase(typeof(Family), typeof(FamilyDto))]
+    [TestCase(typeof(FamilyRole), typeof(FamilyRoleDto))]
+    [TestCase(typeof(UserFamilyRole), typeof(UserFamilyRoleDto))]
+    [TestCase(typeof(User), typeof(UserDto))]
+    [TestCase(typeof(List<UserFamilyRole>), typeof(UserFamilyRoleListDto))]
     public void ShouldSupportMappingMessageObjects(Type source, Type destination)
     {
         var instance = GetInstanceOf(source);

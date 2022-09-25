@@ -89,4 +89,20 @@ public class UserController : ControllerBase
 
         return Ok();
     }
+    
+    [SwaggerOperation(Summary = "Change password of existing user")]
+    [HttpGet("Email/{email}", Name = nameof(GetUserByEmail))]
+    [ProducesResponseType(typeof(UserDto), 200)]
+    public async Task<IActionResult> GetUserByEmail(string email)
+    {
+        var user = await _userService.GetUserByEmail(email).ConfigureAwait(false);
+
+        if (user is not null)
+        {
+            return Ok(user);
+        }
+
+        _logger.LogError("Could not find user with email: " + user.Email);
+        return NotFound();
+    }
 }
