@@ -1,7 +1,3 @@
-using System.IdentityModel.Tokens.Jwt;
-using System.Runtime.InteropServices.ComTypes;
-using System.Security.Claims;
-using System.Text;
 using Application.Dto;
 using Application.Interfaces;
 using AutoMapper;
@@ -9,8 +5,6 @@ using Domain.Entities;
 using Domain.Exceptions;
 using Infrastructure.Interfaces;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.Extensions.Configuration;
-using Microsoft.IdentityModel.Tokens;
 
 namespace Application.Services;
 
@@ -54,16 +48,36 @@ public class UserService : IUserService
         return updateResult;
     }
 
-    public async Task<bool> UpdateUserEmail(UserUpdateEmailDto user)
+    public async Task UpdateUserEmail(UserUpdateEmailDto user)
     {
-        return await _userRepository.UpdateUserEmail(user.OldEmail, user.NewEmail);
+        await _userRepository.UpdateUserEmail(user.OldEmail, user.NewEmail);
     }
 
-    public async Task<bool> UpdateUserPassword(UserUpdatePasswordDto user)
+    public async Task UpdateUserPassword(UserUpdatePasswordDto user)
     {
-        var hash = _passwordHasher.HashPassword(new User(), user.NewPassword);
-        var updateResult = await _userRepository.UpdateUserPassword(user.Email, hash);
+        var userEntity = await _userRepository.GetUserByEmail(user.Email);
+        
+        if (userEntity is null)
+        {
+            throw new UserException("User identified by source email does not exist!");
+        }
+        
+        var hash = _passwordHasher.HashPassword(userEntity, user.NewPassword);
+        var verificationResult = _passwordHasher.VerifyHashedPassword(userEntity, userEntity.Password, user.NewPassword);
 
-        return updateResult;
+        if (verificationResult == PasswordVerificationResult.Success)
+        {
+            throw new PasswordException("Source and destination password are the same!");
+        }
+
+        await _userRepository.UpdateUserPassword(user.Email, hash);
+    }
+
+    public async Task<UserDto> GetUserByEmail(string email)
+    {
+        var entity = await _userRepository.GetUserByEmail(email).ConfigureAwait(false);
+        var dto = _mapper.Map<User, UserDto>(entity);
+
+        return dto;
     }
 }

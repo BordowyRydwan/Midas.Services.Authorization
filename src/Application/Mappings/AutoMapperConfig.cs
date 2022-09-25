@@ -35,6 +35,22 @@ public static class AutoMapperConfig
         result.CreateMap<AddNewFamilyDto, Family>()
             .ForMember(dest => dest.Id, act => act.Ignore());
         
+        result.CreateMap<SetUserFamilyRoleDto, UserFamilyRole>()
+            .ForMember(dest => dest.Family, act => act.Ignore())
+            .ForMember(dest => dest.FamilyRole, act => act.Ignore())
+            .ForMember(dest => dest.User, act => act.Ignore())
+            .ForMember(dest => dest.UserId, act => act.Ignore());
+        
+        result.CreateMap<Family, FamilyDto>();
+        result.CreateMap<FamilyRole, FamilyRoleDto>();
+        result.CreateMap<UserFamilyRole, UserFamilyRoleDto>()
+            .ForMember(dest => dest.FamilyRole, act => act.MapFrom(src => src.FamilyRole))
+            .ForMember(dest => dest.Family, act => act.MapFrom(src => src.Family));
+        result.CreateMap<ICollection<UserFamilyRole>, UserFamilyRoleListDto>()
+            .ForMember(dest => dest.Items, act => act.MapFrom(src => src))
+            .ForMember(dest => dest.Count, act => act.MapFrom(src => src.Count));
+        result.CreateMap<User, UserDto>();
+
         return result;
     }
 

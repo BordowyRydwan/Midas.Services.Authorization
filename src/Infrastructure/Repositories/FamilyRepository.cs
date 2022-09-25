@@ -1,3 +1,4 @@
+using Domain.Consts;
 using Domain.Entities;
 using Domain.Exceptions;
 using Infrastructure.Data;
@@ -37,12 +38,11 @@ public class FamilyRepository : IFamilyRepository
 
         await _dbContext.AddAsync(family).ConfigureAwait(false);
         await _dbContext.SaveChangesAsync().ConfigureAwait(false);
-
-        const ulong mainAdminRoleId = 1UL;
+        
         var userFamilyRole = new UserFamilyRole
         {
             Family = family,
-            FamilyRole = await _dbContext.FamilyRoles.SingleAsync(x => x.Id == mainAdminRoleId),
+            FamilyRoleId = (ulong)FamilyRoles.MainAdministrator,
             User = user
         };
 
@@ -61,6 +61,65 @@ public class FamilyRepository : IFamilyRepository
         }
 
         _dbContext.Families.Remove(family);
+        await _dbContext.SaveChangesAsync().ConfigureAwait(false);
+        return true;
+    }
+
+    public async Task<Family> GetFamilyById(ulong id)
+    {
+        return await _dbContext.Families.FindAsync(id).ConfigureAwait(false);
+    }
+
+    public async Task<bool> AddUserToFamily(ulong userId, ulong familyId)
+    {
+        var keyObject = new { userId, familyId };
+        var userFamilyRoleCheck = await _dbContext.UserFamilyRoles.FindAsync(keyObject).ConfigureAwait(false);
+
+        if (userFamilyRoleCheck is not null)
+        {
+            return false;
+        }
+
+        var newUserFamilyRole = new UserFamilyRole
+        {
+            FamilyId = familyId,
+            UserId = userId,
+            FamilyRoleId = (ulong)FamilyRoles.Child
+        };
+        
+        await _dbContext.UserFamilyRoles.AddAsync(newUserFamilyRole);
+        await _dbContext.SaveChangesAsync().ConfigureAwait(false);
+        return true;
+    }
+
+    public async Task<bool> DeleteUserFromFamily(ulong userId, ulong familyId)
+    {
+        var keyObject = new { userId, familyId };
+        var userFamilyRole = await _dbContext.UserFamilyRoles.FindAsync(keyObject).ConfigureAwait(false);
+
+        if (userFamilyRole is null)
+        {
+            return false;
+        }
+
+        _dbContext.UserFamilyRoles.Remove(userFamilyRole);
+        await _dbContext.SaveChangesAsync().ConfigureAwait(false);
+        return true;
+    }
+
+    public async Task<bool> SetUserFamilyRole(UserFamilyRole userFamilyRole)
+    {
+        var keyObject = new { userFamilyRole.UserId, userFamilyRole.FamilyId };
+        var dbEntity = await _dbContext.UserFamilyRoles.FindAsync(keyObject).ConfigureAwait(false);
+
+        if (dbEntity is null)
+        {
+            return false;
+        }
+
+        dbEntity.FamilyRoleId = userFamilyRole.FamilyRoleId;
+        
+        _dbContext.UserFamilyRoles.Update(dbEntity);
         await _dbContext.SaveChangesAsync().ConfigureAwait(false);
         return true;
     }

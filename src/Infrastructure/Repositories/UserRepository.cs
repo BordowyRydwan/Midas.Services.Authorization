@@ -36,12 +36,18 @@ public class UserRepository : IUserRepository
 
     public async Task<User> GetUserByEmail(string email)
     {
-        return await _dbContext.Users.SingleOrDefaultAsync(x => x.Email == email).ConfigureAwait(false);
+        return await _dbContext.Users
+            .Include(x => x.UserFamilyRoles).ThenInclude(x => x.Family)
+            .Include(x => x.UserFamilyRoles).ThenInclude(x => x.FamilyRole)
+            .SingleOrDefaultAsync(x => x.Email == email).ConfigureAwait(false);
     }
 
     public async Task<User> GetUserById(ulong id)
     {
-        return await _dbContext.Users.FindAsync(id).ConfigureAwait(false);
+        return await _dbContext.Users
+            .Include(x => x.UserFamilyRoles).ThenInclude(x => x.Family)
+            .Include(x => x.UserFamilyRoles).ThenInclude(x => x.FamilyRole)
+            .SingleOrDefaultAsync(x => x.Id == id).ConfigureAwait(false);
     }
 
     public async Task<bool> UpdateUserData(User user)
@@ -52,43 +58,53 @@ public class UserRepository : IUserRepository
         {
             return false;
         }
+        
+        entity.BirthDate = user.BirthDate;
+        entity.FirstName = user.FirstName;
+        entity.LastName = user.LastName;
 
-        user.Id = entity.Id;
-        _dbContext.Users.Update(user);
+        _dbContext.Users.Update(entity);
         await _dbContext.SaveChangesAsync().ConfigureAwait(false);
         
         return true;
     }
 
-    public async Task<bool> UpdateUserEmail(string from, string to)
+    public async Task UpdateUserEmail(string from, string to)
     {
-        var entity = await _dbContext.Users.SingleOrDefaultAsync(x => x.Email == from).ConfigureAwait(false);
+        var fromEntity = await _dbContext.Users.SingleOrDefaultAsync(x => x.Email == from).ConfigureAwait(false);
+        var toEntity = await _dbContext.Users.SingleOrDefaultAsync(x => x.Email == to).ConfigureAwait(false);
 
-        if (entity is null)
+        if (from == to)
         {
-            return false;
+            throw new UserException("Source and destination email are the same!");
         }
 
-        entity.Email = to;
-        _dbContext.Users.Update(entity);
-        await _dbContext.SaveChangesAsync().ConfigureAwait(false);
+        if (fromEntity is null)
+        {
+            throw new UserException("User identified by source email does not exist!");
+        }
+        
+        if (toEntity is not null)
+        {
+            throw new UserException("Other user uses a destination email!");
+        }
 
-        return true;
+        fromEntity.Email = to;
+        _dbContext.Users.Update(fromEntity);
+        await _dbContext.SaveChangesAsync().ConfigureAwait(false);
     }
 
-    public async Task<bool> UpdateUserPassword(string userEmail, string passwordHash)
+    public async Task UpdateUserPassword(string userEmail, string passwordHash)
     {
         var entity = await _dbContext.Users.SingleOrDefaultAsync(x => x.Email == userEmail).ConfigureAwait(false);
 
         if (entity is null)
         {
-            return false;
+            throw new UserException("User identified by source email does not exist!");
         }
 
         entity.Password = passwordHash;
         _dbContext.Users.Update(entity);
         await _dbContext.SaveChangesAsync().ConfigureAwait(false);
-
-        return true;
     }
 }

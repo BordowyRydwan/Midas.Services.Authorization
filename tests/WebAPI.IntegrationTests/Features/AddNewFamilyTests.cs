@@ -12,13 +12,14 @@ using Microsoft.Extensions.Logging;
 using WebAPI.Controllers;
 using Moq;
 
-namespace WebAPI.IntegrationTests.Controllers;
+namespace WebAPI.IntegrationTests.Features;
 
 [TestFixture]
 public class AddNewFamilyTests
 {
     private readonly FamilyController _familyController;
     private readonly UserController _userController;
+    private ulong _id;
 
     public AddNewFamilyTests()
     {
@@ -32,7 +33,7 @@ public class AddNewFamilyTests
         var familyRepository = new FamilyRepository(dbContext);
         var mapper = AutoMapperConfig.Initialize();
 
-        var familyService = new FamilyService(familyRepository, mapper);
+        var familyService = new FamilyService(familyRepository, null, mapper);
         var familyLogger = Mock.Of<ILogger<FamilyController>>();
         _familyController = new FamilyController(familyLogger, familyService);
         
@@ -45,16 +46,18 @@ public class AddNewFamilyTests
     [SetUp]
     public async Task Init()
     {
+        var randomNumber = new Random().Next(1000, 1000000);
         var initialInstance = new UserRegisterDto
         {
-            Email = "test@gmail.com",
+            Email = $"test{randomNumber}@gmail.com",
             FirstName = "Lorem",
             LastName = "Ipsum",
             BirthDate = new DateTime(2002, 1, 20),
             Password = "zaq1@WSX"
         };
         
-        await _userController.RegisterNewUser(initialInstance).ConfigureAwait(false);
+        var result = await _userController.RegisterNewUser(initialInstance).ConfigureAwait(false) as OkObjectResult;
+        _id = (result.Value as UserRegisterReturnDto).Id;
     }
 
     [Test]
@@ -63,7 +66,7 @@ public class AddNewFamilyTests
         var testInstance = new AddNewFamilyDto
         {
             Name = "",
-            FounderId = 1
+            FounderId = _id
         };
 
         var response = await _familyController.AddNewFamily(testInstance).ConfigureAwait(false);
@@ -76,7 +79,7 @@ public class AddNewFamilyTests
     {
         var testInstance = new AddNewFamilyDto
         {
-            FounderId = 1
+            FounderId = _id
         };
 
         var response = await _familyController.AddNewFamily(testInstance).ConfigureAwait(false);
@@ -106,7 +109,7 @@ public class AddNewFamilyTests
         var testInstance = new AddNewFamilyDto
         {
             Name = $"Test {randomNumber}",
-            FounderId = 1
+            FounderId = _id
         };
 
         var response = await _familyController.AddNewFamily(testInstance).ConfigureAwait(false);

@@ -14,7 +14,7 @@ public class ListDtoTests
     }
 
     [Test]
-    [TestCase(typeof(MessageListDto), typeof(IListDto<MessageDto>))]
+    [TestCase(typeof(UserFamilyRoleListDto), typeof(IListDto<UserFamilyRoleDto>))]
     public void ShouldDeriveFromIListDto(Type listDto, Type objectDto)
     {
         var result = objectDto.IsAssignableFrom(listDto);

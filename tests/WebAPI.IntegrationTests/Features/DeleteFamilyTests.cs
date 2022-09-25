@@ -12,7 +12,7 @@ using Microsoft.Extensions.Logging;
 using Moq;
 using WebAPI.Controllers;
 
-namespace WebAPI.IntegrationTests.Controllers;
+namespace WebAPI.IntegrationTests.Features;
 
 [TestFixture]
 public class DeleteFamilyTests
@@ -35,7 +35,7 @@ public class DeleteFamilyTests
         var familyRepository = new FamilyRepository(dbContext);
         var mapper = AutoMapperConfig.Initialize();
 
-        var familyService = new FamilyService(familyRepository, mapper);
+        var familyService = new FamilyService(familyRepository, null, mapper);
         var familyLogger = Mock.Of<ILogger<FamilyController>>();
         _familyController = new FamilyController(familyLogger, familyService);
         

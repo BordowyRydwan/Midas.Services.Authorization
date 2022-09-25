@@ -1,5 +1,6 @@
 using Application.Dto;
 using Application.Interfaces;
+using Domain.Exceptions;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
 
@@ -53,15 +54,17 @@ public class UserController : ControllerBase
     [HttpPatch("Update/Email", Name = nameof(UpdateUserEmail))]
     public async Task<IActionResult> UpdateUserEmail(UserUpdateEmailDto user)
     {
-        var updateSuccess = await _userService.UpdateUserEmail(user).ConfigureAwait(false);
-
-        if (updateSuccess)
+        try
         {
-            return Ok();
+            await _userService.UpdateUserEmail(user).ConfigureAwait(false);
         }
-
-        _logger.LogError("Could not register user with email: {Email}", user.OldEmail);
-        return BadRequest();
+        catch (UserException ex)
+        {
+            _logger.LogError(ex.Message);
+            return BadRequest(ex.Message);
+        }
+        
+        return Ok();
     }
     
     // TODO: Fix security issue - now everyone has access to change everyone's password
@@ -69,14 +72,37 @@ public class UserController : ControllerBase
     [HttpPatch("Update/Password", Name = nameof(UpdateUserPassword))]
     public async Task<IActionResult> UpdateUserPassword(UserUpdatePasswordDto user)
     {
-        var updateSuccess = await _userService.UpdateUserPassword(user).ConfigureAwait(false);
-
-        if (updateSuccess)
+        try
         {
-            return Ok();
+            await _userService.UpdateUserPassword(user).ConfigureAwait(false);
+        }
+        catch (UserException ex)
+        {
+            _logger.LogError(ex.Message);
+            return NotFound("Could not find user with email: " + user.Email);
+        }
+        catch (PasswordException ex)
+        {
+            _logger.LogError(ex.Message);
+            return BadRequest(ex.Message);
         }
 
-        _logger.LogError("Could not update password for user with email: {Email}", user.Email);
-        return BadRequest();
+        return Ok();
+    }
+    
+    [SwaggerOperation(Summary = "Change password of existing user")]
+    [HttpGet("Email/{email}", Name = nameof(GetUserByEmail))]
+    [ProducesResponseType(typeof(UserDto), 200)]
+    public async Task<IActionResult> GetUserByEmail(string email)
+    {
+        var user = await _userService.GetUserByEmail(email).ConfigureAwait(false);
+
+        if (user is not null)
+        {
+            return Ok(user);
+        }
+
+        _logger.LogError("Could not find user with email: " + user.Email);
+        return NotFound();
     }
 }

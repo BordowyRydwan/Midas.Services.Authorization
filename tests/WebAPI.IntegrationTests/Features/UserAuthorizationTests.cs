@@ -13,7 +13,7 @@ using Microsoft.Extensions.Logging;
 using Moq;
 using WebAPI.Controllers;
 
-namespace WebAPI.IntegrationTests.Controllers;
+namespace WebAPI.IntegrationTests.Features;
 
 [TestFixture]
 public class UserAuthorizationTests
