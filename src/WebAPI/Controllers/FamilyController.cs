@@ -52,7 +52,52 @@ public class FamilyController : ControllerBase
             return Ok();
         }
         
-        _logger.LogError("Could not found family with ID: {Id}", id);
+        _logger.LogError("Could not find family with ID: {Id}", id);
+        return NotFound();
+    }
+    
+    [SwaggerOperation(Summary = "Delete specified family")]
+    [HttpPost("Add/User", Name = nameof(AddUserToFamily))]
+    public async Task<IActionResult> AddUserToFamily(AddUserToFamilyDto dto)
+    {
+        var additionSuccessful = await _familyService.AddUserToFamily(dto).ConfigureAwait(false);
+        
+        if (additionSuccessful)
+        {
+            return Ok();
+        }
+        
+        _logger.LogError("Could not add user with email: \"{Email}\" to family id: {Id}", dto.Email, dto.FamilyId);
+        return NotFound();
+    }
+    
+    [SwaggerOperation(Summary = "Delete specified family")]
+    [HttpDelete("Delete/User", Name = nameof(DeleteUserFromFamily))]
+    public async Task<IActionResult> DeleteUserFromFamily(DeleteUserFromFamilyDto dto)
+    {
+        var deletionSuccessful = await _familyService.DeleteUserFromFamily(dto).ConfigureAwait(false);
+        
+        if (deletionSuccessful)
+        {
+            return Ok();
+        }
+        
+        _logger.LogError("Could not add user with email: \"{Email}\" to family id: {Id}", dto.Email, dto.FamilyId);
+        return NotFound();
+    }
+
+    [SwaggerOperation(Summary = "Delete specified family")]
+    [HttpPatch("Set/UserRole", Name = nameof(SetUserFamilyRole))]
+    public async Task<IActionResult> SetUserFamilyRole(SetUserFamilyRoleDto dto)
+    {
+        var settingSuccessful = await _familyService.SetUserFamilyRole(dto).ConfigureAwait(false);
+        
+        if (settingSuccessful)
+        {
+            return Ok();
+        }
+        
+        _logger.LogError("Could not add user with email: \"{Email}\" to family id: {Id}", dto.Email, dto.FamilyId);
         return NotFound();
     }
 }

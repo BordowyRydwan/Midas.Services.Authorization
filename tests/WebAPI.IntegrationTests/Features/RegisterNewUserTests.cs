@@ -12,7 +12,7 @@ using Microsoft.Extensions.Logging;
 using WebAPI.Controllers;
 using Moq;
 
-namespace WebAPI.IntegrationTests.Controllers;
+namespace WebAPI.IntegrationTests.Features;
 
 [TestFixture]
 public class RegisterNewUserTests

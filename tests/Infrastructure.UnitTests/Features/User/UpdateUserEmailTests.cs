@@ -1,4 +1,5 @@
 using Domain.Entities;
+using Domain.Exceptions;
 using Infrastructure.Data;
 using Infrastructure.Interfaces;
 using Infrastructure.Repositories;
@@ -8,10 +9,10 @@ using Moq;
 namespace Infrastructure.UnitTests.Repositories;
 
 [TestFixture]
-public class UpdateUserPasswordTests
+public class UpdateUserEmailTests
 {
     private readonly IUserRepository _repository;
-    
+
     private IList<User> _data = new List<User>
     {
         new()
@@ -26,8 +27,8 @@ public class UpdateUserPasswordTests
             UserFamilyRoles = new List<UserFamilyRole>()
         }
     };
-    
-    public UpdateUserPasswordTests()
+
+    public UpdateUserEmailTests()
     {
         var mockContext = new Mock<AuthorizationDbContext>();
         var mockData = _data.AsQueryable().BuildMockDbSet();
@@ -40,35 +41,26 @@ public class UpdateUserPasswordTests
     [TearDown]
     public void ClearUserPassword()
     {
-        _data.First().Password = string.Empty;
+        _data.First().Email = "test@test.pl";
     }
-    
+
     [Test]
     public async Task ShouldReturnTrue_OnExistingEmail()
     {
-        var email = "test@test.pl";
-        var newPassword = "testowe";
-        var result = await _repository.UpdateUserPassword(email, newPassword).ConfigureAwait(false);
-        
-        Assert.Multiple(() =>
-        {
-            Assert.That(result, Is.True);
-            Assert.That(_data.First().Password, Is.EqualTo(newPassword));
-        });
+        var email = _data.First().Email;
+        var newEmail = "test2@test.pl";
+
+        await _repository.UpdateUserEmail(email, newEmail);
+        Assert.That(_data.First().Email, Is.EqualTo(newEmail));
     }
-    
+
     [Test]
     public async Task ShouldReturnFalse_OnNotExistingEmail()
     {
         var email = "testkljkljkj@test.pl";
-        var oldPassword = _data.First().Password;
-        var newPassword = "testowe";
-        var result = await _repository.UpdateUserPassword(email, newPassword).ConfigureAwait(false);
-        
-        Assert.Multiple(() =>
-        {
-            Assert.That(result, Is.False);
-            Assert.That(_data.First().Password, Is.EqualTo(oldPassword));
-        });
+        var newEmail = "test2@test.pl";
+        var result = _repository.UpdateUserEmail;
+
+        Assert.That(async () => await result(email, newEmail), Throws.Exception.TypeOf<UserException>());
     }
 }
