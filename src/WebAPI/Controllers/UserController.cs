@@ -1,12 +1,14 @@
 using Application.Dto;
 using Application.Interfaces;
 using Domain.Exceptions;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
 
 namespace WebAPI.Controllers;
 
 [ApiController]
+[Authorize]
 [Route("api/[controller]")]
 public class UserController : ControllerBase
 {
@@ -19,6 +21,7 @@ public class UserController : ControllerBase
         _userService = UserService;
     }
 
+    [AllowAnonymous]
     [SwaggerOperation(Summary = "Register new user")]
     [HttpPost("Register", Name = nameof(RegisterNewUser))]
     [ProducesResponseType(typeof(UserRegisterReturnDto), 200)]
@@ -67,7 +70,6 @@ public class UserController : ControllerBase
         return Ok();
     }
     
-    // TODO: Fix security issue - now everyone has access to change everyone's password
     [SwaggerOperation(Summary = "Change password of existing user")]
     [HttpPatch("Update/Password", Name = nameof(UpdateUserPassword))]
     public async Task<IActionResult> UpdateUserPassword(UserUpdatePasswordDto user)

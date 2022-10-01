@@ -60,20 +60,15 @@ public class Startup
 
     public Startup SetDbContext()
     {
-        var connString = _builder.Configuration.GetConnectionString("DefaultConnection");
         var authConnString = _builder.Configuration.GetConnectionString("AuthorizationConnection");
 
-        _builder.Services.AddDbContext<MessageDbContext>(options =>
-        {
-            options.UseSqlServer(connString).EnableSensitiveDataLogging();
-        });
         _builder.Services.AddDbContext<AuthorizationDbContext>(options =>
         {
             options.UseSqlServer(authConnString).EnableSensitiveDataLogging();
         });
         
         _logger.Debug("SQL connection was successfully added");
-
+        
         return this;
     }
 
@@ -89,7 +84,6 @@ public class Startup
 
     public Startup AddInternalServices()
     {
-        _builder.Services.AddScoped<IMessageService, MessageService>();
         _builder.Services.AddScoped<IFamilyService, FamilyService>();
         _builder.Services.AddScoped<IUserService, UserService>();
         _builder.Services.AddScoped<IAuthorizationService, AuthorizationService>();
@@ -100,7 +94,6 @@ public class Startup
 
     public Startup AddInternalRepositories()
     {
-        _builder.Services.AddScoped<IMessageRepository, MessageRepository>();
         _builder.Services.AddScoped<IFamilyRepository, FamilyRepository>();
         _builder.Services.AddScoped<IUserRepository, UserRepository>();
         _logger.Debug("Internal repositories were successfully added");
@@ -224,6 +217,7 @@ public class Startup
         }
         
         app.MigrateDatabase();
+        app.UseAuthentication();
         app.UseHttpsRedirection();
         app.UseCors("Open");
         app.UseAuthorization();

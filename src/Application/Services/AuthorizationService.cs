@@ -63,7 +63,7 @@ public class AuthorizationService : IAuthorizationService
 
         var token = new JwtSecurityToken(
             issuer: _configuration["Jwt:Issuer"], 
-            audience: _configuration["Jwt:Key"], 
+            audience: _configuration["Jwt:Issuer"], 
             claims: claims, 
             expires: expires, 
             signingCredentials: cred
