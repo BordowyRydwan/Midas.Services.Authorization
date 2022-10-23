@@ -10,4 +10,5 @@ new WebAPI.Startup(args)
     .AddValidators()
     .AddPasswordHashers()
     .SetupAuthentication()
+    .SetExternalServiceClients()
     .Run();

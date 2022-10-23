@@ -5,31 +5,36 @@ using Application.Dto;
 using Application.Interfaces;
 using AutoMapper;
 using Domain.Entities;
+using Domain.Exceptions;
 using Infrastructure.Interfaces;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
+using Midas.Services;
 
 namespace Application.Services;
 
 public class AuthorizationService : IAuthorizationService
 {
     private readonly IUserRepository _userRepository;
-    private readonly IMapper _mapper;
     private readonly IPasswordHasher<User> _passwordHasher;
+    private readonly IMapper _mapper;
     private readonly IConfiguration _configuration;
+    private readonly IUserClient _userClient;
 
     public AuthorizationService(
-        IUserRepository userRepository, 
-        IMapper mapper, 
+        IUserRepository userRepository,
         IPasswordHasher<User> passwordHasher,
-        IConfiguration configuration
+        IMapper mapper,
+        IConfiguration configuration,
+        IUserClient userClient
     )
     {
         _userRepository = userRepository;
-        _mapper = mapper;
         _passwordHasher = passwordHasher;
+        _mapper = mapper;
         _configuration = configuration;
+        _userClient = userClient;
     }
     
     public async Task<bool> CheckUserCredentials(UserLoginDto user)
@@ -48,7 +53,7 @@ public class AuthorizationService : IAuthorizationService
 
     public async Task<string> GenerateJwtToken(UserLoginDto user)
     {
-        var userEntity = await _userRepository.GetUserByEmail(user.Email).ConfigureAwait(false);
+        var userEntity = await _userClient.GetUserByEmailAsync(user.Email).ConfigureAwait(false);
 
         var claims = new List<Claim>
         {
@@ -71,5 +76,26 @@ public class AuthorizationService : IAuthorizationService
         
         var tokenHandler = new JwtSecurityTokenHandler();
         return tokenHandler.WriteToken(token);
+    }
+    
+    public async Task<UserRegisterReturnDto> RegisterNewUser(Dto.UserRegisterDto user)
+    {
+        var userEntity = _mapper.Map<Dto.UserRegisterDto, User>(user);
+        var userAddInfoDto = _mapper.Map<Dto.UserRegisterDto, Midas.Services.UserRegisterDto>(user);
+        var returnModel = new UserRegisterReturnDto();
+
+        userEntity.Password = _passwordHasher.HashPassword(userEntity, user.Password);
+
+        try
+        {
+            returnModel = await _userClient.RegisterNewUserAsync(userAddInfoDto).ConfigureAwait(false);
+            await _userRepository.AddNewUser(userEntity).ConfigureAwait(false);
+        }
+        catch (UserException)
+        {
+            return null;
+        }
+
+        return returnModel;
     }
 }

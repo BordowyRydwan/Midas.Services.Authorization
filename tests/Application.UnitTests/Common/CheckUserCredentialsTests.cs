@@ -6,6 +6,7 @@ using Domain.Entities;
 using Infrastructure.Interfaces;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
+using Midas.Services;
 using Moq;
 
 namespace Application.UnitTests.Common;
@@ -21,10 +22,7 @@ public class CheckUserCredentialsTests
         {
             Id = 23,
             Email = "dawid.wijata@hotmail.com",
-            FirstName = "Dawid",
-            LastName = "Wijata",
-            BirthDate = new DateTime(1998, 10, 12),
-            UserFamilyRoles = new List<UserFamilyRole>()
+            Password = string.Empty
         }
     };
     
@@ -40,7 +38,7 @@ public class CheckUserCredentialsTests
         mockRepository.Setup(x => x.GetUserByEmail(It.IsAny<string>()))
             .ReturnsAsync((string email) => _data.FirstOrDefault(x => x.Email == email));
 
-        _service = new AuthorizationService(mockRepository.Object, mapper, mockPasswordHasher, mockConfiguration.Object);
+        _service = new AuthorizationService(mockRepository.Object, mockPasswordHasher, mapper, mockConfiguration.Object, null);
     }
 
     [Test]

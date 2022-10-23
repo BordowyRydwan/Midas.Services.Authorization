@@ -21,10 +21,26 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
+    <PackageReference Include="NSwag.ApiDescription.Client" Version="13.17.0">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="NSwag.MSBuild" Version="13.17.0">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Domain\Domain.csproj" />
   </ItemGroup>
-
+  
+  <ItemGroup>
+    <OpenApiReference Include="OpenAPIs\user.json" CodeGenerator="NSwagCSharp" Namespace="Midas.Services">
+      <ClassName>UserClient</ClassName>
+      <OutputPath>..\Clients\UserClient.cs</OutputPath>
+      <Options>/GenerateClientInterfaces:true /UseBaseUrl:false</Options>
+    </OpenApiReference>
+  </ItemGroup>
 </Project>

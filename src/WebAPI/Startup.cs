@@ -15,9 +15,13 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using Midas.Services;
 using NLog;
 using NLog.Web;
 using WebAPI.Extensions;
+using UserRegisterDto = Application.Dto.UserRegisterDto;
+using UserUpdateDto = Application.Dto.UserUpdateDto;
+using UserUpdateEmailDto = Application.Dto.UserUpdateEmailDto;
 
 namespace WebAPI;
 
@@ -38,7 +42,6 @@ public class Startup
     {
         _builder.Services.AddControllers();
         _builder.Services.AddEndpointsApiExplorer();
-        _builder.Services.AddSwaggerGen();
 
         return this;
     }
@@ -84,8 +87,6 @@ public class Startup
 
     public Startup AddInternalServices()
     {
-        _builder.Services.AddScoped<IFamilyService, FamilyService>();
-        _builder.Services.AddScoped<IUserService, UserService>();
         _builder.Services.AddScoped<IAuthorizationService, AuthorizationService>();
         _logger.Debug("Internal services were successfully added");
 
@@ -94,7 +95,6 @@ public class Startup
 
     public Startup AddInternalRepositories()
     {
-        _builder.Services.AddScoped<IFamilyRepository, FamilyRepository>();
         _builder.Services.AddScoped<IUserRepository, UserRepository>();
         _logger.Debug("Internal repositories were successfully added");
 
@@ -190,6 +190,23 @@ public class Startup
 
         return this;
     }
+    
+    public Startup SetExternalServiceClients()
+    {
+        var authServiceAddress = _builder.Configuration["ServiceAddresses:User"];
+        var httpClientDelegate = (Action<HttpClient>)(client => client.BaseAddress = new Uri(authServiceAddress));
+        var httpClientHandler = new HttpClientHandler
+        {
+            ClientCertificateOptions = ClientCertificateOption.Manual,
+            ServerCertificateCustomValidationCallback = (httpRequestMessage, cert, certChain, policyErrors) => true
+        };    
+
+        _builder.Services.AddHttpClient<IUserClient, UserClient>(httpClientDelegate)
+            .ConfigurePrimaryHttpMessageHandler(() => httpClientHandler)
+            .AddHeaderPropagation();
+        
+        return this;
+    }
 
     public void Run()
     {
@@ -215,7 +232,8 @@ public class Startup
             app.UseSwagger();
             app.UseSwaggerUI();
         }
-        
+
+        app.UseHeaderPropagation();
         app.MigrateDatabase();
         app.UseAuthentication();
         app.UseHttpsRedirection();

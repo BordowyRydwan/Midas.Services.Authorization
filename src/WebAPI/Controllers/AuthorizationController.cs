@@ -1,7 +1,10 @@
 using Application.Dto;
-using Application.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Midas.Services;
 using Swashbuckle.AspNetCore.Annotations;
+using IAuthorizationService = Application.Interfaces.IAuthorizationService;
+using UserRegisterDto = Application.Dto.UserRegisterDto;
 
 namespace WebAPI.Controllers;
 
@@ -33,5 +36,21 @@ public class AuthorizationController : ControllerBase
 
         var jwtToken = await _authorizationService.GenerateJwtToken(user).ConfigureAwait(false);
         return Ok(jwtToken);
+    }
+    
+    [SwaggerOperation(Summary = "Register new user")]
+    [HttpPost("Register", Name = nameof(RegisterNewUser))]
+    [ProducesResponseType(typeof(UserRegisterReturnDto), 200)]
+    public async Task<IActionResult> RegisterNewUser(UserRegisterDto user)
+    {
+        var registerReturnDto = await _authorizationService.RegisterNewUser(user).ConfigureAwait(false);
+
+        if (registerReturnDto is not null)
+        {
+            return Ok(registerReturnDto);
+        }
+
+        _logger.LogError("Could not register user with email: {Email}", user.Email);
+        return BadRequest();
     }
 }

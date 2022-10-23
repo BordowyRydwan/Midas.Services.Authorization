@@ -37,61 +37,13 @@ public class UserRepository : IUserRepository
     public async Task<User> GetUserByEmail(string email)
     {
         return await _dbContext.Users
-            .Include(x => x.UserFamilyRoles).ThenInclude(x => x.Family)
-            .Include(x => x.UserFamilyRoles).ThenInclude(x => x.FamilyRole)
             .SingleOrDefaultAsync(x => x.Email == email).ConfigureAwait(false);
     }
 
     public async Task<User> GetUserById(ulong id)
     {
         return await _dbContext.Users
-            .Include(x => x.UserFamilyRoles).ThenInclude(x => x.Family)
-            .Include(x => x.UserFamilyRoles).ThenInclude(x => x.FamilyRole)
             .SingleOrDefaultAsync(x => x.Id == id).ConfigureAwait(false);
-    }
-
-    public async Task<bool> UpdateUserData(User user)
-    {
-        var entity = await _dbContext.Users.SingleOrDefaultAsync(x => x.Email == user.Email).ConfigureAwait(false);
-
-        if (entity is null)
-        {
-            return false;
-        }
-        
-        entity.BirthDate = user.BirthDate;
-        entity.FirstName = user.FirstName;
-        entity.LastName = user.LastName;
-
-        _dbContext.Users.Update(entity);
-        await _dbContext.SaveChangesAsync().ConfigureAwait(false);
-        
-        return true;
-    }
-
-    public async Task UpdateUserEmail(string from, string to)
-    {
-        var fromEntity = await _dbContext.Users.SingleOrDefaultAsync(x => x.Email == from).ConfigureAwait(false);
-        var toEntity = await _dbContext.Users.SingleOrDefaultAsync(x => x.Email == to).ConfigureAwait(false);
-
-        if (from == to)
-        {
-            throw new UserException("Source and destination email are the same!");
-        }
-
-        if (fromEntity is null)
-        {
-            throw new UserException("User identified by source email does not exist!");
-        }
-        
-        if (toEntity is not null)
-        {
-            throw new UserException("Other user uses a destination email!");
-        }
-
-        fromEntity.Email = to;
-        _dbContext.Users.Update(fromEntity);
-        await _dbContext.SaveChangesAsync().ConfigureAwait(false);
     }
 
     public async Task UpdateUserPassword(string userEmail, string passwordHash)

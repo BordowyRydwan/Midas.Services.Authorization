@@ -25,11 +25,8 @@ public class MappingTests
     }
 
     [Test]
-    [TestCase(typeof(Family), typeof(FamilyDto))]
-    [TestCase(typeof(FamilyRole), typeof(FamilyRoleDto))]
-    [TestCase(typeof(UserFamilyRole), typeof(UserFamilyRoleDto))]
-    [TestCase(typeof(User), typeof(UserDto))]
-    [TestCase(typeof(List<UserFamilyRole>), typeof(UserFamilyRoleListDto))]
+    [TestCase(typeof(UserRegisterDto), typeof(User))]
+    [TestCase(typeof(UserRegisterDto), typeof(Midas.Services.UserRegisterDto))]
     public void ShouldSupportMappingMessageObjects(Type source, Type destination)
     {
         var instance = GetInstanceOf(source);

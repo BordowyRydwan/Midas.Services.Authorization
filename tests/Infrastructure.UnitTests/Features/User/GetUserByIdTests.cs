@@ -19,11 +19,6 @@ public class GetUserByIdTests
         {
             Id = 1,
             Email = "test@test.pl",
-            FirstName = "Test 1",
-            LastName = "Test 1",
-            BirthDate = DateTime.UtcNow,
-            RegisterDate = DateTime.UtcNow,
-            UserFamilyRoles = new List<UserFamilyRole>()
         }
     };
 

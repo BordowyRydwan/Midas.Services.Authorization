@@ -19,11 +19,6 @@ public class AddUserTests
         {
             Id = 1,
             Email = "test@test.pl",
-            FirstName = "Test 1",
-            LastName = "Test 1",
-            BirthDate = DateTime.UtcNow,
-            RegisterDate = DateTime.UtcNow,
-            UserFamilyRoles = new List<UserFamilyRole>()
         }
     };
 
@@ -57,11 +52,6 @@ public class AddUserTests
             {
                 Id = 1,
                 Email = "test@test.pl",
-                FirstName = "Test 1",
-                LastName = "Test 1",
-                BirthDate = DateTime.UtcNow,
-                RegisterDate = DateTime.UtcNow,
-                UserFamilyRoles = new List<UserFamilyRole>()
             }
         };
     }
@@ -72,10 +62,6 @@ public class AddUserTests
         var testInstance = new User
         {
             Email = "test@test.pl",
-            FirstName = "Test 1",
-            LastName = "Test 1",
-            BirthDate = DateTime.UtcNow,
-            RegisterDate = DateTime.UtcNow
         };
 
         var exception = Assert.ThrowsAsync<UserException>(async () =>
@@ -94,10 +80,6 @@ public class AddUserTests
         var testInstance = new User
         {
             Email = "test2@test.pl",
-            FirstName = "Test 1",
-            LastName = "Test 1",
-            BirthDate = DateTime.UtcNow,
-            RegisterDate = DateTime.UtcNow
         };
 
         await _repository.AddNewUser(testInstance).ConfigureAwait(false);
