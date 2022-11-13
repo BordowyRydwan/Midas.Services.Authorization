@@ -1,3 +1,4 @@
+using System.Text.Json;
 using Application.Dto;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -24,6 +25,7 @@ public class AuthorizationController : ControllerBase
     [SwaggerOperation(Summary = "Login a user")]
     [HttpPost("Login", Name = nameof(AuthorizeUser))]
     [ProducesResponseType(typeof(string), 200)]
+    [ProducesResponseType(typeof(string), 400)]
     public async Task<IActionResult> AuthorizeUser(UserLoginDto user)
     {
         var userCredentialsCheck = await _authorizationService.CheckUserCredentials(user).ConfigureAwait(false);
@@ -35,12 +37,13 @@ public class AuthorizationController : ControllerBase
         }
 
         var jwtToken = await _authorizationService.GenerateJwtToken(user).ConfigureAwait(false);
-        return Ok(jwtToken);
+        return Ok(JsonSerializer.Serialize(jwtToken));
     }
     
     [SwaggerOperation(Summary = "Register new user")]
     [HttpPost("Register", Name = nameof(RegisterNewUser))]
     [ProducesResponseType(typeof(UserRegisterReturnDto), 200)]
+    [ProducesResponseType(typeof(string), 400)]
     public async Task<IActionResult> RegisterNewUser(UserRegisterDto user)
     {
         var registerReturnDto = await _authorizationService.RegisterNewUser(user).ConfigureAwait(false);
