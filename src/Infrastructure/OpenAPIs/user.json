@@ -1,8 +1,8 @@
 {
     "openapi": "3.0.1",
     "info": {
-        "title": "WebAPI",
-        "version": "1.0"
+        "title": "Users API",
+        "version": "0.1"
     },
     "paths": {
         "/api/User/Register": {
@@ -10,6 +10,7 @@
                 "tags": [
                     "User"
                 ],
+                "summary": "Register new user",
                 "operationId": "RegisterNewUser",
                 "requestBody": {
                     "content": {
@@ -59,6 +60,7 @@
                 "tags": [
                     "User"
                 ],
+                "summary": "Update data of existing user",
                 "operationId": "UpdateUserData",
                 "requestBody": {
                     "content": {
@@ -91,6 +93,7 @@
                 "tags": [
                     "User"
                 ],
+                "summary": "Update email address of existing user",
                 "operationId": "UpdateUserEmail",
                 "requestBody": {
                     "content": {
@@ -123,6 +126,7 @@
                 "tags": [
                     "User"
                 ],
+                "summary": "Get a user by email address",
                 "operationId": "GetUserByEmail",
                 "parameters": [
                     {
@@ -163,6 +167,7 @@
                 "tags": [
                     "User"
                 ],
+                "summary": "Get a user by id",
                 "operationId": "GetUserById",
                 "parameters": [
                     {
@@ -175,6 +180,37 @@
                         }
                     }
                 ],
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "content": {
+                            "text/plain": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UserDto"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UserDto"
+                                }
+                            },
+                            "text/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UserDto"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/User": {
+            "get": {
+                "tags": [
+                    "User"
+                ],
+                "summary": "Get an active user",
+                "operationId": "GetActiveUser",
                 "responses": {
                     "200": {
                         "description": "Success",
@@ -228,6 +264,14 @@
                     "birthDate": {
                         "type": "string",
                         "format": "date-time"
+                    },
+                    "description": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "profileImage": {
+                        "type": "string",
+                        "format": "uuid"
                     }
                 },
                 "additionalProperties": false
@@ -286,6 +330,14 @@
                     "birthDate": {
                         "type": "string",
                         "format": "date-time"
+                    },
+                    "description": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "profileImage": {
+                        "type": "string",
+                        "format": "uuid"
                     }
                 },
                 "additionalProperties": false

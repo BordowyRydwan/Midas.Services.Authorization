@@ -1,16 +1,23 @@
-version: "3.3"
+version: "3.5"
 
 services:
   web:
+    container_name: authorization_web
     build: .
     ports:
       - "8002:80"
     depends_on:
       - db
   db:
+    container_name: authorization_db
     image: "mcr.microsoft.com/mssql/server"
     environment:
       ACCEPT_EULA: "Y"
       SA_PASSWORD: zaq1@WSX
     ports:
       - "6002:1433"
+
+networks:
+  default:
+    name: midas
+    external: true
