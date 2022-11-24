@@ -59,4 +59,29 @@ public class UserRepository : IUserRepository
         _dbContext.Users.Update(entity);
         await _dbContext.SaveChangesAsync().ConfigureAwait(false);
     }
+    
+    public async Task UpdateUserEmail(string from, string to)
+    {
+        var fromEntity = await _dbContext.Users.SingleOrDefaultAsync(x => x.Email == from).ConfigureAwait(false);
+        var toEntity = await _dbContext.Users.SingleOrDefaultAsync(x => x.Email == to).ConfigureAwait(false);
+
+        if (from == to)
+        {
+            throw new UserException("Source and destination email are the same!");
+        }
+
+        if (fromEntity is null)
+        {
+            throw new UserException("User identified by source email does not exist!");
+        }
+        
+        if (toEntity is not null)
+        {
+            throw new UserException("Other user uses a destination email!");
+        }
+
+        fromEntity.Email = to;
+        _dbContext.Users.Update(fromEntity);
+        await _dbContext.SaveChangesAsync().ConfigureAwait(false);
+    }
 }

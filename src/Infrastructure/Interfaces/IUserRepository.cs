@@ -9,4 +9,6 @@ public interface IUserRepository
     public Task<User> GetUserByEmail(string email);
     public Task<User> GetUserById(ulong id);
     public Task UpdateUserPassword(string userEmail, string passwordHash);
+    public Task UpdateUserEmail(string from, string to);
+
 }

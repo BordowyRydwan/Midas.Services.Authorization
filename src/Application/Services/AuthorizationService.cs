@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using Midas.Services;
+using UserUpdateEmailDto = Application.Dto.UserUpdateEmailDto;
 
 namespace Application.Services;
 
@@ -97,5 +98,10 @@ public class AuthorizationService : IAuthorizationService
         }
 
         return returnModel;
+    }
+    
+    public async Task UpdateUserEmail(UserUpdateEmailDto user)
+    {
+        await _userRepository.UpdateUserEmail(user.OldEmail, user.NewEmail);
     }
 }

@@ -1,11 +1,13 @@
 using System.Text.Json;
 using Application.Dto;
+using Domain.Exceptions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Midas.Services;
 using Swashbuckle.AspNetCore.Annotations;
 using IAuthorizationService = Application.Interfaces.IAuthorizationService;
 using UserRegisterDto = Application.Dto.UserRegisterDto;
+using UserUpdateEmailDto = Application.Dto.UserUpdateEmailDto;
 
 namespace WebAPI.Controllers;
 
@@ -55,5 +57,24 @@ public class AuthorizationController : ControllerBase
 
         _logger.LogError("Could not register user with email: {Email}", user.Email);
         return BadRequest();
+    }
+    
+    [SwaggerOperation(Summary = "Update email address of existing user")]
+    [HttpPatch("Update/Email", Name = nameof(UpdateUserEmail))]
+    [ProducesResponseType(typeof(string), 200)]
+    [ProducesResponseType(typeof(string), 400)]
+    public async Task<IActionResult> UpdateUserEmail(UserUpdateEmailDto user)
+    {
+        try
+        {
+            await _authorizationService.UpdateUserEmail(user).ConfigureAwait(false);
+        }
+        catch (UserException ex)
+        {
+            _logger.LogError(ex.Message + "\n" + ex.StackTrace);
+            return BadRequest(ex.Message);
+        }
+        
+        return Ok("User email updated");
     }
 }
