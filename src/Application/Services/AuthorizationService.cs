@@ -92,8 +92,14 @@ public class AuthorizationService : IAuthorizationService
             returnModel = await _userClient.RegisterNewUserAsync(userAddInfoDto).ConfigureAwait(false);
             await _userRepository.AddNewUser(userEntity).ConfigureAwait(false);
         }
-        catch (UserException)
+        catch (UserException e)
         {
+            Console.WriteLine(e);
+            return null;
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
             return null;
         }
 
