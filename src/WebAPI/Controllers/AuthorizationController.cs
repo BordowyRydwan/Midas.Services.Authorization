@@ -75,6 +75,6 @@ public class AuthorizationController : ControllerBase
             return BadRequest(ex.Message);
         }
         
-        return Ok("User email updated");
+        return Ok(JsonSerializer.Serialize("User email updated"));
     }
 }
