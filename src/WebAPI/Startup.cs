@@ -87,7 +87,7 @@ public class Startup
 
     public Startup AddInternalServices()
     {
-        _builder.Services.AddScoped<IAuthorizationService, AuthorizationService>();
+        _builder.Services.AddTransient<IAuthorizationService, AuthorizationService>();
         _logger.Debug("Internal services were successfully added");
 
         return this;
@@ -95,7 +95,7 @@ public class Startup
 
     public Startup AddInternalRepositories()
     {
-        _builder.Services.AddScoped<IUserRepository, UserRepository>();
+        _builder.Services.AddTransient<IUserRepository, UserRepository>();
         _logger.Debug("Internal repositories were successfully added");
 
         return this;
