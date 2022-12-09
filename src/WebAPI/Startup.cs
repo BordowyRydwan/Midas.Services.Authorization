@@ -87,7 +87,7 @@ public class Startup
 
     public Startup AddInternalServices()
     {
-        _builder.Services.AddTransient<IAuthorizationService, AuthorizationService>();
+        _builder.Services.AddScoped<IAuthorizationService, AuthorizationService>();
         _logger.Debug("Internal services were successfully added");
 
         return this;
@@ -95,7 +95,7 @@ public class Startup
 
     public Startup AddInternalRepositories()
     {
-        _builder.Services.AddTransient<IUserRepository, UserRepository>();
+        _builder.Services.AddScoped<IUserRepository, UserRepository>();
         _logger.Debug("Internal repositories were successfully added");
 
         return this;
@@ -195,14 +195,16 @@ public class Startup
     {
         var authServiceAddress = _builder.Configuration["ServiceAddresses:User"];
         var httpClientDelegate = (Action<HttpClient>)(client => client.BaseAddress = new Uri(authServiceAddress));
-        var httpClientHandler = new HttpClientHandler
-        {
-            ClientCertificateOptions = ClientCertificateOption.Manual,
-            ServerCertificateCustomValidationCallback = (httpRequestMessage, cert, certChain, policyErrors) => true
-        };    
+          
 
         _builder.Services.AddHttpClient<IUserClient, UserClient>(httpClientDelegate)
-            .ConfigurePrimaryHttpMessageHandler(() => httpClientHandler)
+            .ConfigurePrimaryHttpMessageHandler(() => {
+                return new HttpClientHandler
+                {
+                    ClientCertificateOptions = ClientCertificateOption.Manual,
+                    ServerCertificateCustomValidationCallback = (httpRequestMessage, cert, certChain, policyErrors) => true
+                };  
+            })
             .AddHeaderPropagation();
         
         return this;
@@ -211,29 +213,14 @@ public class Startup
     public void Run()
     {
         var app = _builder.Build();
-        
-        app.UseExceptionHandler(appError =>
-        {
-            appError.Run(async context =>
-            {
-                context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
-                context.Response.ContentType = "application/json";
-                
-                var contextFeature = context.Features.Get<IExceptionHandlerFeature>();
-                if (contextFeature != null)
-                {
-                    _logger.Error($"Something went wrong: {contextFeature.Error}");
-                }
-            });
-        });
-        
+
+        app.UseCors("Open");
         app.UseSwagger();
         app.UseSwaggerUI();
         app.UseHeaderPropagation();
-        app.MigrateDatabase();
+        //app.MigrateDatabase();
         app.UseAuthentication();
         app.UseHttpsRedirection();
-        app.UseCors("Open");
         app.UseAuthorization();
         app.MapControllers();
         app.Run();

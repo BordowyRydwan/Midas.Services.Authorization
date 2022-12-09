@@ -36,14 +36,18 @@ public class UserRepository : IUserRepository
 
     public async Task<User> GetUserByEmail(string email)
     {
-        return await _dbContext.Users
+        var result = await _dbContext.Users
             .SingleOrDefaultAsync(x => x.Email == email).ConfigureAwait(false);
+
+        return result;
     }
 
     public async Task<User> GetUserById(ulong id)
     {
-        return await _dbContext.Users
+        var result = await _dbContext.Users
             .SingleOrDefaultAsync(x => x.Id == id).ConfigureAwait(false);
+
+        return result;
     }
 
     public async Task UpdateUserPassword(string userEmail, string passwordHash)
