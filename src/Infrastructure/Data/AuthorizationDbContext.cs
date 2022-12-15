@@ -10,4 +10,9 @@ public class AuthorizationDbContext : DbContext
     public AuthorizationDbContext() { }
 
     public AuthorizationDbContext(DbContextOptions options) : base(options) { }
+    
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        modelBuilder.HasDefaultSchema("auth");
+    }
 }
