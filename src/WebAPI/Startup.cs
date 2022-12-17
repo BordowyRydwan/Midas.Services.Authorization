@@ -218,7 +218,7 @@ public class Startup
         app.UseSwagger();
         app.UseSwaggerUI();
         app.UseHeaderPropagation();
-        app.MigrateDatabase();
+        //app.MigrateDatabase();
         app.UseAuthentication();
         app.UseHttpsRedirection();
         app.UseAuthorization();
